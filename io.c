@@ -2,11 +2,15 @@
 
 // co linijke fgets() sscanf by podzielić na key i value i zwrócić wartość dla target_key przypisując go do structa LevelConfig i osobno dla hunterów
 void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count);
-void load_sprites(char* attribute, char value[256], LevelConfig_t* config, int i);
+void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list);
 char* maloc_sprite(LevelConfig_t* config, int i);
+void assign_values(LevelConfig_t* config, char* key,char line[256]) ;
+void load_player(char* attribute,int value, char string_val[256], LevelConfig_t* config);
 
 LevelConfig_t* load_level_config(int level_num) {
     LevelConfig_t* config = malloc(sizeof(LevelConfig_t));
+    config->player = NULL;
+    config->hunters = NULL;
     char filename[128];
     sprintf(filename, "data/level%d.conf", level_num);
     FILE* file = fopen(filename, "r");
@@ -16,35 +20,52 @@ LevelConfig_t* load_level_config(int level_num) {
     char line[256], key[64];
     while (fgets(line, sizeof(line), file)) {
         if (line[0] == '#' || line[0] == '\n') continue;
-        int value;
-        char attribute[64];
-        if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
-            if (strcmp(key, "map_rows") == 0) config->map_rows = value;
-            else if (strcmp(key, "map_cols") == 0) config->map_cols = value;
-            else if (strcmp(key, "status_rows") == 0) config->status_rows = value;
-            else if (strcmp(key, "status_cols") == 0) config->status_cols = value;
-            else if (strcmp(key, "time_limit_ms") == 0) config->time_limit_ms = value;
-            else if (strcmp(key, "star_quota") == 0) config->star_quota = value;
-            else if (strcmp(key, "player_health") == 0) config->player_health = value;
-            else if (strcmp(key, "hunter_spawn_rate") == 0) config->hunter_spawn_rate = value;
-            else if (strcmp(key, "hunter_type_count") == 0) {
-                config->hunter_type_count = value;
-                config->hunters = malloc(sizeof(Enemy_t) * value);
-            }
-            else if (strcmp(key, "seed") == 0) config->seed = value;
-            if(config->hunter_type_count ) {
-                load_hunters(key, value, attribute, config, config->hunter_type_count);
-            }
-        }
-        else if(sscanf(line, "%[^=]=%s", key, attribute) == 2) {
-            if(config->hunter_type_count ) {
-                load_hunters(key,0,attribute, config, config->hunter_type_count);
-            }
-        }
+        assign_values(config, key,line);
     }
     fclose(file);
     return config;  
 }
+void base_asignements(LevelConfig_t* config, char* key,int value) {
+    if (strcmp(key, "map_rows") == 0) config->map_rows = value;
+    else if (strcmp(key, "map_cols") == 0) config->map_cols = value;
+    else if (strcmp(key, "status_rows") == 0) config->status_rows = value;
+    else if (strcmp(key, "status_cols") == 0) config->status_cols = value;
+    else if (strcmp(key, "time_limit_ms") == 0) config->time_limit_ms = value;
+    else if (strcmp(key, "star_quota") == 0) config->star_quota = value;
+    else if (strcmp(key, "player_health") == 0) config->player_health = value;
+    else if (strcmp(key, "hunter_spawn_rate") == 0) config->hunter_spawn_rate = value;
+    else if (strcmp(key, "max_speed") == 0) config->max_speed = value;
+    else if (strcmp(key, "delta_speed") == 0) config->delta_speed = value;
+    else if (strcmp(key, "min_speed") == 0) config->min_speed = value;
+    else if (strcmp(key, "damage_over_time_mult") == 0) config->damage_over_time_mult = value;
+    else if (strcmp(key, "score_time_bias") == 0) config->score_time_bias = value;
+    else if (strcmp(key, "score_star_bias") == 0) config->score_star_bias = value;
+    if (strcmp(key, "hunter_type_count") == 0) {
+        config->hunter_type_count = value;
+        config->hunters = malloc(sizeof(Enemy_t) * value);
+        if(config->hunters == NULL) {
+            exit(1);
+        }
+    }
+    else if (strcmp(key, "seed") == 0) config->seed = value;
+}
+
+void assign_values(LevelConfig_t* config, char* key,char line[256]) {
+        int value;
+        char attribute[64];
+        if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+            base_asignements( config, key, value);
+            load_hunters(key,value,"", config, config->hunter_type_count);
+            load_player(key, value, "", config);
+        }
+        else if(sscanf(line, "%[^=]=%s", key, attribute) == 2) {
+            if(config->hunter_type_count ) {
+                load_hunters(key,0,attribute, config, config->hunter_type_count);
+                load_player(key, 0, attribute, config);
+            }
+        }
+}
+
 void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count) {
     for(int i=0; i < count; i++) {
         char prefix[32];
@@ -59,12 +80,11 @@ void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* c
         else if (strcmp(attribute, "bounces") == 0) config->hunters[i].bounces = value;
         else if (strcmp(attribute, "damage") == 0) config->hunters[i].damage = value;
         else {
-            load_sprites(attribute, string_val, config, i);
+            load_sprites(attribute, string_val,&config->hunters[i].obj.sprites_list);
         }
     }
 }
-void load_sprites(char* attribute, char value[256], LevelConfig_t* config, int i) {
-    SpriteList_t* sprite_list= &config->hunters[i].obj.sprites_list;
+void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list) {
     if (strcmp(attribute, "left") == 0) {
         sprite_list->left = malloc(sizeof(char) * (strlen(value) + 1));
         strcpy(sprite_list->left, value);
@@ -82,6 +102,24 @@ void load_sprites(char* attribute, char value[256], LevelConfig_t* config, int i
         strcpy(sprite_list->down, value);
     }
 }
+void load_player(char key[64],int value, char string_val[256], LevelConfig_t* config) {
+    char* prefix = "player_";
+    if(strncmp(key, prefix, strlen(prefix)) != 0) return;
+    char attribute[32];
+    sscanf(key + strlen(prefix), "%[^=]", attribute);
+    if (config->player == NULL) {
+        config->player = malloc(sizeof(Player_t));
+        if(config->player == NULL) {
+            exit(1);
+        }
+    }
+    if (strcmp(attribute, "width") == 0) config->player->obj.width = value;
+    else if (strcmp(attribute, "height") == 0) config->player->obj.height = value;
+    else if (strcmp(attribute, "speed_x") == 0) config->player->obj.speed_x = value;
+    else if (strcmp(attribute, "speed_y") == 0) config->player->obj.speed_y = value;
+    else if (strcmp(attribute, "life_force") == 0) config->player->life_force = value;
+    else load_sprites(attribute, string_val,&config->player->obj.sprites_list);
+}
 void free_level_config(LevelConfig_t* config) {
     if (config == NULL) return;
     for (int i = 0; i < config->hunter_type_count; i++) {
@@ -91,5 +129,10 @@ void free_level_config(LevelConfig_t* config) {
         free(config->hunters[i].obj.sprites_list.down);
     }
     free(config->hunters);
+    free(config->player->obj.sprites_list.left);
+    free(config->player->obj.sprites_list.right);
+    free(config->player->obj.sprites_list.up);
+    free(config->player->obj.sprites_list.down);
+    free(config->player);
     free(config);
 }

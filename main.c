@@ -56,7 +56,7 @@ int main(){
     init_ncurses();
     Win* main_win=create_window(config->map_rows,config->map_cols,0,0,1);
     Win* status_win=create_window(config->status_rows,config->status_cols,0,config->map_rows,0);
-    Player_t* player=create_player();
+    Player_t* player=create_player(config);
     refresh();
     mount_upd(main_win);
     mount_upd(status_win);

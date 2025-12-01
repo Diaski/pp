@@ -50,36 +50,19 @@ void handle_player_input(Player_t* p, char input, Win* win){
             break;
     }
 }
-Player_t* create_player(){
+Player_t* create_player(LevelConfig_t* config){
     Player_t* p = malloc(sizeof(Player_t));
-    p->obj.width=3;
-    p->obj.height=3;
+    p->obj.width=config->player->obj.width;
+    p->obj.height=config->player->obj.height;
     p->obj.x = 10;
     p->obj.y = 10;
-    p->obj.speed_x = 1;
-    p->obj.speed_y = 1;
-    setup_player_sprites(p);
+    p->obj.speed_x = config->player->obj.speed_x;
+    p->obj.speed_y = config->player->obj.speed_y;
+    p->obj.sprites_list = config->player->obj.sprites_list;
     p->obj.current_sprite = p->obj.sprites_list.down;
-    p->life_force = 100;
+    p->life_force = config->player->life_force;
     return p;
 }
-void setup_player_sprites(Player_t* p){
-    p->obj.sprites_list.down = malloc(sizeof(char)*p->obj.width*p->obj.height +1);
-    p->obj.sprites_list.up = malloc(sizeof(char)*p->obj.width*p->obj.height +1);
-    p->obj.sprites_list.left = malloc(sizeof(char)*p->obj.width*p->obj.height +1);
-    p->obj.sprites_list.right = malloc(sizeof(char)*p->obj.width*p->obj.height +1);
-    if(!p->obj.sprites_list.down || !p->obj.sprites_list.up || !p->obj.sprites_list.left || !p->obj.sprites_list.right){
-        exit(1);
-    }
-    strcpy(p->obj.sprites_list.down, ".|./|\\.v.");
-    strcpy(p->obj.sprites_list.up, ".^./|\\.|.");
-    strcpy(p->obj.sprites_list.left, "./.<--.\\.");
-    strcpy(p->obj.sprites_list.right, ".\\.-->./.");
-}
 void destroy_player(Player_t* p){
-    free(p->obj.sprites_list.down);
-    free(p->obj.sprites_list.up);
-    free(p->obj.sprites_list.left);
-    free(p->obj.sprites_list.right);
     free(p);
 }

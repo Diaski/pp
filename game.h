@@ -60,13 +60,10 @@ typedef struct {
 
 
 typedef struct {
-    int map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed;
+    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias;
+    Player_t* player;
     Enemy_t* hunters;
 } LevelConfig_t;
-
-typedef struct{
-    Win* main_win,status_win;
-}Config_t;
 
 //init.c
 void init_ncurses();
@@ -87,9 +84,9 @@ void copy_sprite(Sprite_t dest, const Sprite_t src);
 void handle_player_input(Player_t* p, char input, Win* win);
 void draw_player(const Player_t* p,Win* win);
 int move_player(Player_t* p, Win* win);
-Player_t* create_player();
+Player_t* create_player(LevelConfig_t* config);
 void destroy_player(Player_t* p);
-void setup_player_sprites(Player_t* p);
+void setup_player_sprites(Player_t* p, LevelConfig_t* config);
 void remove_player_from_window(Player_t* player, Win* win);
 
 //map.c
