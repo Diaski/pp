@@ -71,7 +71,7 @@ void init_ncurses();
 //graphic.c
 Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
-void update_status_display(Win* win, int x, int y);
+void update_status_display(Win* win, int x, int y,int gamespeed,char input);
 void mount_upd(Win* win);
 
 //physics.c

@@ -29,26 +29,25 @@ void handle_player_input(Player_t* p, char input, Win* win){
         case 'w':
             p->obj.dx = 0;
             p->obj.dy = -p->obj.speed_y;
-            move_player(p, win);
             break;
         case 's':
             p->obj.dx = 0;
             p->obj.dy = p->obj.speed_y;
-            move_player(p, win);
             break;
         case 'a':
             p->obj.dx = -p->obj.speed_x;
             p->obj.dy = 0;
-            move_player(p, win);
+            break;
             break;
         case 'd':
             p->obj.dx = p->obj.speed_x;
             p->obj.dy = 0;
-            move_player(p, win);
+            break;
             break;
         default:
             break;
     }
+    move_player(p, win);
 }
 Player_t* create_player(LevelConfig_t* config){
     Player_t* p = malloc(sizeof(Player_t));

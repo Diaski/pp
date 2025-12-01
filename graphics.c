@@ -22,11 +22,13 @@ void draw_border(Win* win) {
     wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
 }
 
-void update_status_display(Win* win, int x, int y) {
+void update_status_display(Win* win, int x, int y,int gamespeed,char input){
     wattron(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
     mvwprintw(win->window,1,2,"skibidi");
     mvwprintw(win->window, 2, 3, "Level: %-5d",x);
     mvwprintw(win->window, 3, 4, "| Time: %-5d",y);
+    mvwprintw(win->window, 4, 5, "| Speed: %-5d",gamespeed);
+    mvwprintw(win->window, 5, 6, "| Input: %-5c",input);
     wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
 }
 void draw_Welcome_Screen(Win* screen){
