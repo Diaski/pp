@@ -59,5 +59,8 @@
   "editor.fontFamily": "Fira Code",
   "editor.fontSize": 18,
   "cmake.configureSettings": {},
-  "editor.fontLigatures": true
+  "editor.fontLigatures": true,
+  "files.associations": {
+    "game.h": "c"
+  }
 }

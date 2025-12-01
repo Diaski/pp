@@ -23,49 +23,55 @@
     endwin();
     return 0;
 }*/
-int game_loop(Win* main_win, Win* status_win, Player_t* player, Map_t map){
-    char input;
+int game_loop(Win* main_win, Win* status_win, Player_t* player){
+    char input,last_input;
     while (1)
     {
         nodelay(stdscr, TRUE);
         input = getch();
+        if(input != ERR){       
+            last_input = input;
+        } else {
+            input = last_input;
+        }
         while (getch() != ERR);
         nodelay(stdscr, FALSE);
         if(input == 'q'){
             return 0;
         }
-        map[0][0]='X';
-        handle_player_input(player, input);
+        remove_player_from_window(player, main_win);
+        handle_player_input(player, input,main_win);
+        update_status_display(status_win, player->obj.x, player->obj.y);
         draw_player(player, main_win);
-        werase(main_win->window);
         wnoutrefresh(main_win->window);
         mount_upd(status_win);
         doupdate();
-        usleep(100);
+        usleep(100000);
     }
     
     return 0;
 }
 int main(){
+    LevelConfig_t* config = load_level_config(1);
     init_ncurses();
-    Win* main_win=create_window(20, 40, 0, 0);
-    Win* status_win=create_window(10, 40, 20, 0);
+    Win* main_win=create_window(config->map_rows,config->map_cols,0,0,1);
+    Win* status_win=create_window(config->status_rows,config->status_cols,0,config->map_rows,0);
+    Player_t* player=create_player();
     refresh();
     mount_upd(main_win);
     mount_upd(status_win);
-    Map_t map=create_map(main_win->rows,main_win->cols);
-    Player_t* player=create_player();
     draw_player(player,main_win);
     wnoutrefresh(main_win->window);
     doupdate();
-    if(!game_loop(main_win,status_win,player,map)){
+    if(!game_loop(main_win,status_win,player)){
         //endgame condition
     }
     destroy_player(player);
     delwin(main_win->window);
     delwin(status_win->window);
     endwin();
-    free_map(map,main_win->rows);
+    free_map(main_win->map, main_win->rows);
     free(main_win);
     free(status_win);
+    free_level_config(config);
 }

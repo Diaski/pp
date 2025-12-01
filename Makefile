@@ -1,4 +1,4 @@
-SRC = main.c graphics.c init.c io.c physics.c funcs.c actors.c
+SRC = main.c graphics.c init.c io.c physics.c funcs.c actors.c map.c
 # Prefer clang when present, otherwise fall back to system cc
 CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 
@@ -6,7 +6,7 @@ CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw 2>/dev/null || pkg-config --cflags ncurses 2>/dev/null || echo "-I/usr/include")
 NCURSES_LIBS := $(shell pkg-config --libs ncursesw 2>/dev/null || pkg-config --libs ncurses 2>/dev/null || echo "-lncursesw")
 
-CFLAGS = -O0 -g -Wall -Werror -Wextra $(NCURSES_CFLAGS)
+CFLAGS = -O0 -g -Wall -Werror -Wextra $(NCURSES_CFLAGS) -fsanitize=address
 LDFLAGS =
 
 LDLIBS = $(NCURSES_LIBS)

@@ -1,46 +1,23 @@
 #include "game.h"
-#include <stdlib.h>
 
-Map_t create_game_map(int rows,int cols){
-    Map_t map = malloc(sizeof(char*)*rows);
-    if (map!=NULL){
-        for(int x=0;x<rows;x++){
-            map[x]=malloc(sizeof(char)*cols);
-            if (map[x]==NULL){
-                free_map(map,x);
-                return NULL;
-            }
-        }
-    }
-    return map;
-}
-
-
-void fill_border_to_map(Map_t map,int rows,int cols){
-    for (int y=0;y<rows;y++){
-        for(int x=0;x<cols;x++){
-            if (x==0 || y==0 || y==rows-1 || x==cols-1){
-                map[y][x]=BORDER;
-                continue;
-            }
-            map[y][x]=' ';
-        }
-    }
-}
-
-Map_t create_map(int rows,int cols){
-    Map_t map = create_game_map(rows,cols);
-    fill_border_to_map(map,rows,cols);
-    return map;
-}
-int detect_wall_collision(GameObject_t obj, Map_t map){
-    for(int i=0; i<obj.dx;i++){
-        if(map[obj.y][obj.x +obj.dx]==BORDER){
+int detect_wall_collision(GameObject_t obj, Win* win){
+    if(obj.dx >0){
+        if(obj.x + obj.width + obj.dx >= win->cols ){
             return HORIZONTAL;
         }
     }
-    for(int i=0;i<obj.dy;i++){
-        if(map[obj.y+obj.dy][obj.x]==BORDER){
+    if(obj.dx <0){
+        if(obj.x + obj.dx <= 0){
+            return HORIZONTAL;
+        }
+    }
+    if(obj.dy >0){
+        if(obj.y + obj.height + obj.dy >= win->rows ){
+            return VERTICAL;
+        }
+    }
+    if(obj.dy <0){
+        if(obj.y + obj.dy <= 0){
             return VERTICAL;
         }
     }
