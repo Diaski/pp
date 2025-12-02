@@ -93,20 +93,32 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
     }
     return 1;
 }
+int check_config(LevelConfig_t* config){
+    if (config == NULL) {
+        return 1;
+    }
+    if(config->seed == 0){
+        return 1;
+    }
+    return 0;
+}
+
+void end_game(char* player_name, int level_num, int res){
+    if(res == 0){
+        congratulate_player_win(player_name, level_num);
+    } else {
+        printf("Level failed or exited.\n");
+    }
+}
+
 int level_selector(int level_num, char* player_name){
     LevelConfig_t* config = load_level_config(level_num);
     Enemy_t** hunters=malloc(sizeof(Enemy_t*) * config->max_enemys_per_level);
     Star_t** stars=malloc(sizeof(Star_t*) * config->max_enemys_per_level);
     int stars_count=0;
     int hunters_count=0;
-    if (config == NULL) {
-        printf("Failed to load level configuration.\n");
-        return 1;
-    }
-    if(config->seed == 0){
-        exit(1);
-    } else {
-        srand(config->seed);
+    if (check_config(config)){
+        return 2;
     }
 
     Win* main_win=create_window(config->map_rows,config->map_cols,0,0,1);
@@ -121,11 +133,7 @@ int level_selector(int level_num, char* player_name){
     wnoutrefresh(main_win->window);
     doupdate();
     int res=game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count, level_num, stars, &stars_count);
-    if(res == 0){
-        congratulate_player_win(player_name, level_num);
-    } else {
-        printf("Level failed or exited.\n");
-    }
+    end_game(player_name, level_num, res);
     free_all_from_level(config, hunters, hunters_count, stars, stars_count, main_win, status_win, player);
     return res;
 }
