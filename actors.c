@@ -1,4 +1,5 @@
 #include "game.h"
+#include <stdlib.h>
 
 int move_player(Player_t* p, Win* win){
     if(detect_wall_collision(p->obj, win)!=0){return 0;};
@@ -56,33 +57,36 @@ Player_t* create_player(LevelConfig_t* config){
     p->obj.sprites_list = config->player->obj.sprites_list;
     p->obj.current_sprite = p->obj.sprites_list.down;
     p->life_force = config->player->life_force;
+    p->obj.color=config->player->obj.color;
     return p;
 }
 void destroy_player(Player_t* p){
     free(p);
 }
-Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type){
-    Enemy_t* enemy = malloc(sizeof(Enemy_t));
-    enemy->obj.width = config->hunters[type].obj.width;
-    enemy->obj.height = config->hunters[type].obj.height;
+void enemy_random_data(Enemy_t* enemy,Win* win){
     if(rand()%2==0){
-        enemy->obj.x = rand() % (win->cols - enemy->obj.width - 2) + 1;
-        enemy->obj.y = (rand()%2==0)?1:(win->rows - enemy->obj.height -1);
+        if(rand()%2==0){
+            enemy->obj.x = 1;
+            enemy->obj.y = rand()%(win->rows - enemy->obj.height -2) +1;
+            enemy->obj.dx = enemy->obj.speed_x;
+        } else {
+            enemy->obj.x = win->cols - enemy->obj.width -1;
+            enemy->obj.y = rand()%(win->rows - enemy->obj.height -2) +1;
+            enemy->obj.dx = -enemy->obj.speed_x;
+        }
+        enemy->obj.dy = 0;
     } else {
-        enemy->obj.y = rand() % (win->rows - enemy->obj.height - 2) + 1;
-        enemy->obj.x = (rand()%2==0)?1:(win->cols - enemy->obj.width -1);
+        if(rand()%2==0){
+            enemy->obj.y = 1;
+            enemy->obj.x = rand()%(win->cols - enemy->obj.width -2) +1;
+            enemy->obj.dy = enemy->obj.speed_y;
+        } else {
+            enemy->obj.y = win->rows - enemy->obj.height -1;
+            enemy->obj.x = rand()%(win->cols - enemy->obj.width -2) +1;
+            enemy->obj.dy = -enemy->obj.speed_y;
+        }
+        enemy->obj.dx = 0;
     }
-    enemy->alive = 1;
-    enemy->obj.speed_x = config->hunters[type].obj.speed_x;
-    enemy->obj.speed_y = config->hunters[type].obj.speed_y;
-    enemy->obj.dx = (rand()%2==0)?enemy->obj.speed_x:-enemy->obj.speed_x;
-    enemy->obj.dy = (rand()%2==0)?enemy->obj.speed_y:-enemy->obj.speed_y;
-    enemy->bounces = config->hunters[type].bounces;
-    enemy->damage = config->hunters[type].damage;
-    enemy->obj.sprites_list = config->hunters[type].obj.sprites_list;
-    enemy->obj.current_sprite = enemy->obj.sprites_list.down;
-    draw_to_map_obj(enemy->obj, win, ENEMY_SPRITE);
-    return enemy;
 }
 int check_if_hit_player(Enemy_t* enemy,Map_t map){
     for(int row = 0; row < enemy->obj.height; row++){
@@ -93,6 +97,27 @@ int check_if_hit_player(Enemy_t* enemy,Map_t map){
         }
     }
     return 0;
+}
+Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type){
+    Enemy_t* enemy = malloc(sizeof(Enemy_t));
+    Enemy_t temp_enemy = config->hunters[type];
+    enemy->obj.width = temp_enemy.obj.width;
+    enemy->obj.height = temp_enemy.obj.height;
+    enemy->obj.speed_x = temp_enemy.obj.speed_x;
+    enemy->obj.speed_y = temp_enemy.obj.speed_y;
+    enemy->obj.sprites_list = temp_enemy.obj.sprites_list;
+    enemy->obj.color = temp_enemy.obj.color;
+    enemy->damage = temp_enemy.damage;
+    enemy->alive = 1;
+    enemy->bounces = temp_enemy.bounces;
+    enemy->obj.current_sprite = enemy->obj.sprites_list.down;
+    enemy_random_data(enemy,win);
+    while(check_if_hit_player(enemy, win->map)){
+        enemy_random_data(enemy,win);
+    }
+    calculate_damage(enemy, config->time_limit_ms, 0, config->damage_over_time_mult);
+    draw_to_map_obj(enemy->obj, win, ENEMY_SPRITE);
+    return enemy;
 }
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
     int collision=detect_wall_collision(enemy->obj, win);
@@ -132,6 +157,9 @@ void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
     draw_to_map_obj(enemy->obj,win, ENEMY_SPRITE);
     draw_obj(enemy->obj, win);
 }
-void destroy_enemy(Enemy_t* enemy){
+void destroy_enemy_list(Enemy_t** enemy, int count){
+    for (int i = 0; i <= count; i++) {
+        free(enemy[i]);
+    }
     free(enemy);
 }

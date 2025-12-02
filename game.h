@@ -9,9 +9,15 @@
 #include <string.h>
 #include <unistd.h>
 
+
 #define WHITE_ON_BLACK_PAIR 1
 #define RED_ON_BLACK_PAIR 2
 #define YELLOW_ON_BLACK_PAIR 3
+#define GREEN_ON_BLACK_PAIR 4
+#define BLUE_ON_BLACK_PAIR 5
+#define CYAN_ON_BLACK_PAIR 6
+#define MAGENTA_ON_BLACK_PAIR 7
+#define COLOR_PAIR_COUNT 7
 #define HORIZONTAL 1
 #define VERTICAL 2
 #define BORDER 'B'
@@ -24,6 +30,16 @@ typedef char** Map_t;
 
 typedef char* Sprite_t;
 
+typedef enum Colors{
+    white = WHITE_ON_BLACK_PAIR,
+    red = RED_ON_BLACK_PAIR,
+    yellow = YELLOW_ON_BLACK_PAIR,
+    green = GREEN_ON_BLACK_PAIR,
+    blue = BLUE_ON_BLACK_PAIR,
+    cyan = CYAN_ON_BLACK_PAIR,
+    meganta = MAGENTA_ON_BLACK_PAIR
+}Colors_t;
+
 typedef struct {
     Sprite_t left;
     Sprite_t right;
@@ -34,6 +50,7 @@ typedef struct {
 typedef struct {
     int x,y,dx,dy,width,height;
     int speed_x;int speed_y;
+    int color;
     SpriteList_t sprites_list;
     Sprite_t current_sprite;
 }GameObject_t;
@@ -62,7 +79,7 @@ typedef struct {
 
 
 typedef struct {
-    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias;
+    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias,max_enemys_per_level;
     Player_t* player;
     Enemy_t* hunters;
 } LevelConfig_t;
@@ -82,6 +99,7 @@ int detect_wall_collision(GameObject_t obj, Win* win);
 
 //funcs.c small functions to make code more readable
 void copy_sprite(Sprite_t dest, const Sprite_t src);
+void calculate_damage(Enemy_t* enemy, int time_max, int time_left, int dmg_mult);
 
 //actors.c
 void handle_player_input(Player_t* p, char input, Win* win);
@@ -91,7 +109,7 @@ void destroy_player(Player_t* p);
 void setup_player_sprites(Player_t* p, LevelConfig_t* config);
 void remove_obj_from_window(GameObject_t obj, Win* win);
 Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type);
-void destroy_enemy(Enemy_t* enemy);
+void destroy_enemy_list(Enemy_t** enemy, int count);
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player);
 
 //map.c

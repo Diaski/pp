@@ -50,11 +50,28 @@ void remove_obj_from_window(GameObject_t obj, Win* win){
         }
     }
 }
-
+void select_color(GameObject_t obj,Win* win){
+    if(obj.color > 0 && obj.color <= COLOR_PAIR_COUNT){
+        wattron(win->window, COLOR_PAIR(obj.color));
+    }
+    else{
+        wattron(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
+    }
+}
+void deselect_color(GameObject_t obj,Win* win){
+    if(obj.color > 0 && obj.color <= COLOR_PAIR_COUNT){
+        wattroff(win->window, COLOR_PAIR(obj.color));
+    }
+    else{
+        wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
+    }
+}
 void draw_obj(const GameObject_t obj, Win* win){
+    select_color(obj,win);
     for(int row = 0; row < obj.height; row++){
         for(int col = 0; col < obj.width; col++){
             mvwaddch(win->window, obj.y + row, obj.x + col, obj.current_sprite[row * obj.width + col]);
         }
     }
+    deselect_color(obj,win);
 }

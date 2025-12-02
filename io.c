@@ -46,6 +46,7 @@ void base_asignements(LevelConfig_t* config, char* key,int value) {
     if (strcmp(key, "score_time_bias") == 0) config->score_time_bias = value;
     if (strcmp(key, "score_star_bias") == 0) config->score_star_bias = value;
     if (strcmp(key, "seed") == 0) config->seed = value;
+    if (strcmp(key, "max_enemys_per_level") == 0) config->max_enemys_per_level = value;
 }
 
 void assign_values(LevelConfig_t* config, char* key,char line[256]) {
@@ -84,6 +85,7 @@ void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* c
         else if (strcmp(attribute, "speed_y") == 0) config->hunters[i].obj.speed_y = value;
         else if (strcmp(attribute, "bounces") == 0) config->hunters[i].bounces = value;
         else if (strcmp(attribute, "damage") == 0) config->hunters[i].damage = value;
+        else if (strcmp(attribute, "color") == 0) config->hunters[i].obj.color = value;
         else {
             load_sprites(attribute, string_val,&config->hunters[i].obj.sprites_list);
         }
@@ -123,6 +125,7 @@ void load_player(char key[64],int value, char string_val[256], LevelConfig_t* co
     else if (strcmp(attribute, "speed_x") == 0) config->player->obj.speed_x = value;
     else if (strcmp(attribute, "speed_y") == 0) config->player->obj.speed_y = value;
     else if (strcmp(attribute, "life_force") == 0) config->player->life_force = value;
+    else if (strcmp(attribute, "color") == 0) config->player->obj.color = value;
     else load_sprites(attribute, string_val,&config->player->obj.sprites_list);
 }
 void check_if_sprite_is_correct(GameObject_t* obj) {
