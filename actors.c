@@ -158,7 +158,7 @@ void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
     draw_obj(enemy->obj, win);
 }
 void destroy_enemy_list(Enemy_t** enemy, int count){
-    for (int i = 0; i <= count; i++) {
+    for (int i = 0; i < count; i++) {
         free(enemy[i]);
     }
     free(enemy);

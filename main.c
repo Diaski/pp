@@ -1,6 +1,6 @@
 #include "game.h"
 
-int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,LevelConfig_t* config,Enemy_t** hunters,int hunters_count){
+int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,LevelConfig_t* config,Enemy_t** hunters,int* hunters_count){
     char input,last_input;
     if (hunters == NULL) {
         return(1);
@@ -23,14 +23,14 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         }
         remove_obj_from_window(player->obj, main_win);
         handle_player_input(player, input,main_win);
-        if(rand()%config->hunter_spawn_rate==0 && hunters_count < config->max_enemys_per_level){
+        if(rand()%config->hunter_spawn_rate==0 && *hunters_count < config->max_enemys_per_level){
             Enemy_t* new_enemy=spawn_enemy(main_win, config, rand()%(config->hunter_type_count-1)+1);
             if(new_enemy != NULL){
-                hunters[hunters_count]=new_enemy;
-                hunters_count++;
+                hunters[*hunters_count]=new_enemy;
+                (*hunters_count)++;
             }
         }
-        for(int i=0;i<hunters_count;i++){
+        for(int i=0;i<*hunters_count;i++){
             if(hunters[i]->alive){
                 move_enemy(hunters[i], main_win, player);
             }
@@ -69,7 +69,7 @@ int level_selector(int level_num){
     draw_obj(player->obj,main_win);
     wnoutrefresh(main_win->window);
     doupdate();
-    if(!game_loop(main_win,status_win,player, game_speed,config,hunters,hunters_count)){
+    if(!game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count)){
         //endgame condition
     }
     destroy_player(player);

@@ -13,7 +13,7 @@ LevelConfig_t* load_level_config(int level_num) {
     config->player = NULL;
     config->hunters = NULL;
     char filename[128];
-    sprintf(filename, "data/level%d.conf", level_num);
+    snprintf(filename, sizeof(filename), "data/level%d.conf", level_num);
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         exit(1);
@@ -75,7 +75,7 @@ void assign_values(LevelConfig_t* config, char* key,char line[256]) {
 void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count) {
     for(int i=0; i < count; i++) {
         char prefix[32];
-        sprintf(prefix, "hunter_%d_", i+1);
+        snprintf(prefix, sizeof(prefix), "hunter_%d_", i+1);
         if (strncmp(key, prefix, strlen(prefix)) != 0) continue;
         char attribute[32];
         sscanf(key + strlen(prefix), "%[^=]", attribute);
