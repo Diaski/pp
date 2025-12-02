@@ -61,6 +61,7 @@
   "cmake.configureSettings": {},
   "editor.fontLigatures": true,
   "files.associations": {
-    "game.h": "c"
+    "game.h": "c",
+    "random": "c"
   }
 }

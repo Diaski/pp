@@ -2,7 +2,10 @@
 
 int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,LevelConfig_t* config){
     char input,last_input;
-    Enemy_t* hunter=spawn_enemy(main_win, config, 2);
+    Enemy_t* hunter_list[5];
+    for(int i=0;i<5;i++){
+        hunter_list[i]=spawn_enemy(main_win,config,i+1);
+    }
     while (1)
     {   
         nodelay(stdscr, TRUE);
@@ -11,8 +14,10 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
             input = last_input;
         }
         if(input == 'q'){
-            if(hunter !=NULL){
-                destroy_enemy(hunter);
+            for(int i=0;i<5;i++){
+                if(hunter_list[i] !=NULL){
+                    destroy_enemy(hunter_list[i]);
+                }
             }
             return 0;
         }
@@ -24,8 +29,11 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         }
         remove_obj_from_window(player->obj, main_win);
         handle_player_input(player, input,main_win);
-        if(hunter->alive == 1){
-            move_enemy(hunter, main_win, player);
+
+        for(int i=0;i<5;i++){
+            if(hunter_list[i]->alive == 1){
+                move_enemy(hunter_list[i], main_win, player);
+            }
         }
         update_status_display(status_win, player->obj.x, player->obj.y,game_speed,input);
         draw_obj(player->obj, main_win);
@@ -35,13 +43,15 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         input=0;
         usleep(game_speed * 1000);
     }
-    if(hunter !=NULL){
-        destroy_enemy(hunter);
+    for(int i=0;i<5;i++){
+        if(hunter_list[i] !=NULL){
+            destroy_enemy(hunter_list[i]);
+        }
     }
     return 0;
 }
 int main(){
-    LevelConfig_t* config = load_level_config(1);
+    LevelConfig_t* config = load_level_config(2);
     if (config == NULL) {
         printf("Failed to load level configuration.\n");
         return 1;
