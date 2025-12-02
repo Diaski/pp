@@ -38,13 +38,9 @@ void handle_player_input(Player_t* p, char input, Win* win){
             p->obj.dx = -p->obj.speed_x;
             p->obj.dy = 0;
             break;
-            break;
         case 'd':
             p->obj.dx = p->obj.speed_x;
             p->obj.dy = 0;
-            break;
-            break;
-        default:
             break;
     }
     move_player(p, win);
@@ -64,4 +60,78 @@ Player_t* create_player(LevelConfig_t* config){
 }
 void destroy_player(Player_t* p){
     free(p);
+}
+Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type){
+    Enemy_t* enemy = malloc(sizeof(Enemy_t));
+    enemy->obj.width = config->hunters[type].obj.width;
+    enemy->obj.height = config->hunters[type].obj.height;
+    if(rand()%2==0){
+        enemy->obj.x = rand() % (win->cols - enemy->obj.width - 2) + 1;
+        enemy->obj.y = (rand()%2==0)?1:(win->rows - enemy->obj.height -1);
+    } else {
+        enemy->obj.y = rand() % (win->rows - enemy->obj.height - 2) + 1;
+        enemy->obj.x = (rand()%2==0)?1:(win->cols - enemy->obj.width -1);
+    }
+    enemy->alive = 1;
+    enemy->obj.speed_x = config->hunters[type].obj.speed_x;
+    enemy->obj.speed_y = config->hunters[type].obj.speed_y;
+    enemy->obj.dx = (rand()%2==0)?enemy->obj.speed_x:-enemy->obj.speed_x;
+    enemy->obj.dy = (rand()%2==0)?enemy->obj.speed_y:-enemy->obj.speed_y;
+    enemy->bounces = config->hunters[type].bounces;
+    enemy->damage = config->hunters[type].damage;
+    enemy->obj.sprites_list = config->hunters[type].obj.sprites_list;
+    enemy->obj.current_sprite = enemy->obj.sprites_list.down;
+    draw_to_map_obj(enemy->obj, win, ENEMY_SPRITE);
+    return enemy;
+}
+int check_if_hit_player(Enemy_t* enemy,Map_t map){
+    for(int row = 0; row < enemy->obj.height; row++){
+        for(int col = 0; col < enemy->obj.width; col++){
+            if(map[enemy->obj.y + row][enemy->obj.x + col] == PLAYER_SPRITE){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
+    int collision=detect_wall_collision(enemy->obj, win);
+    remove_from_map_obj(enemy->obj, win);
+    remove_obj_from_window(enemy->obj, win);
+    if(collision){
+        if(enemy->bounces-1 > 0){
+            if(collision == HORIZONTAL){
+                enemy->obj.dx = -enemy->obj.dx;
+                collision = detect_wall_collision(enemy->obj, win);
+            }
+            if (collision == VERTICAL){
+                enemy->obj.dy = -enemy->obj.dy;
+            }
+            enemy->bounces--;
+        } else {
+            enemy->alive = 0;
+            return;
+        }
+    }
+    enemy->obj.x += enemy->obj.dx;
+    enemy->obj.y += enemy->obj.dy;
+    if(enemy->obj.dx > 0){
+        enemy->obj.current_sprite = enemy->obj.sprites_list.right;
+    } else if(enemy->obj.dx < 0){
+        enemy->obj.current_sprite = enemy->obj.sprites_list.left;
+    } else if(enemy->obj.dy > 0){
+        enemy->obj.current_sprite = enemy->obj.sprites_list.down;
+    } else if(enemy->obj.dy < 0){
+        enemy->obj.current_sprite = enemy->obj.sprites_list.up;
+    }
+    if(check_if_hit_player(enemy, win->map)){
+        player->life_force -= enemy->damage;
+        enemy->alive = 0;
+        return;
+    }
+    draw_to_map_obj(enemy->obj,win, ENEMY_SPRITE);
+    draw_obj(enemy->obj, win);
+}
+void destroy_enemy(Enemy_t* enemy){
+    free(enemy);
 }

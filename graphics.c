@@ -43,18 +43,18 @@ void del_window(Win* win){
     free(win);
 }
 
-void remove_player_from_window(Player_t* player, Win* win){
-    for(int row = 0; row < player->obj.height; row++){
-        for(int col = 0; col < player->obj.width; col++){
-            mvwaddch(win->window, player->obj.y + row, player->obj.x + col, ' ');
+void remove_obj_from_window(GameObject_t obj, Win* win){
+    for(int row = 0; row < obj.height; row++){
+        for(int col = 0; col < obj.width; col++){
+            mvwaddch(win->window, obj.y + row, obj.x + col, ' ');
         }
     }
 }
 
-void draw_player(const Player_t* p,Win* win){
-    for(int row = 0; row < p->obj.height; row++){
-        for(int col = 0; col < p->obj.width; col++){
-            mvwaddch(win->window, p->obj.y + row, p->obj.x + col, p->obj.current_sprite[row * p->obj.width + col]);
+void draw_obj(const GameObject_t obj, Win* win){
+    for(int row = 0; row < obj.height; row++){
+        for(int col = 0; col < obj.width; col++){
+            mvwaddch(win->window, obj.y + row, obj.x + col, obj.current_sprite[row * obj.width + col]);
         }
     }
 }

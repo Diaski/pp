@@ -16,6 +16,8 @@
 #define VERTICAL 2
 #define BORDER 'B'
 #define PLAYER_SPRITE 'P'
+#define ENEMY_SPRITE 'E'
+#define STAR_SPRITE '*'
 #define PLAYER_NAME_MAX 100
 
 typedef char** Map_t;
@@ -73,6 +75,7 @@ Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
 void update_status_display(Win* win, int x, int y,int gamespeed,char input);
 void mount_upd(Win* win);
+void draw_obj(const GameObject_t obj, Win* win);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
@@ -82,12 +85,14 @@ void copy_sprite(Sprite_t dest, const Sprite_t src);
 
 //actors.c
 void handle_player_input(Player_t* p, char input, Win* win);
-void draw_player(const Player_t* p,Win* win);
 int move_player(Player_t* p, Win* win);
 Player_t* create_player(LevelConfig_t* config);
 void destroy_player(Player_t* p);
 void setup_player_sprites(Player_t* p, LevelConfig_t* config);
-void remove_player_from_window(Player_t* player, Win* win);
+void remove_obj_from_window(GameObject_t obj, Win* win);
+Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type);
+void destroy_enemy(Enemy_t* enemy);
+void move_enemy(Enemy_t* enemy, Win* win, Player_t* player);
 
 //map.c
 void create_map(Win* win);
