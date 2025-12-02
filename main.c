@@ -1,5 +1,21 @@
 #include "game.h"
+void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count){
+    if(rand()%config->hunter_spawn_rate==0 && *hunters_count < config->max_enemys_per_level){
+        Enemy_t* new_enemy=spawn_enemy(win, config, rand()%(config->hunter_type_count-1)+1);
+        if(new_enemy != NULL){
+            hunters[*hunters_count]=new_enemy;
+            (*hunters_count)++;
+        }
+    }
 
+}
+void move_enemy_list(Enemy_t** enemy, int count, Win* win, Player_t* player){
+    for (int i = 0; i < count; i++) {
+        if(enemy[i]->alive){
+            move_enemy(enemy[i], win, player);
+        }
+    }
+}
 int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,LevelConfig_t* config,Enemy_t** hunters,int* hunters_count){
     char input,last_input;
     if (hunters == NULL) {
@@ -12,7 +28,7 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         if(last_input != ERR){       
             input = last_input;
         }
-        if(input == 'q'){
+        if(input == 'q' || player->life_force <= 0){
             return 0;
         }
         if(input == 'p' && game_speed -config->delta_speed >= config->max_speed){
@@ -23,19 +39,9 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         }
         remove_obj_from_window(player->obj, main_win);
         handle_player_input(player, input,main_win);
-        if(rand()%config->hunter_spawn_rate==0 && *hunters_count < config->max_enemys_per_level){
-            Enemy_t* new_enemy=spawn_enemy(main_win, config, rand()%(config->hunter_type_count-1)+1);
-            if(new_enemy != NULL){
-                hunters[*hunters_count]=new_enemy;
-                (*hunters_count)++;
-            }
-        }
-        for(int i=0;i<*hunters_count;i++){
-            if(hunters[i]->alive){
-                move_enemy(hunters[i], main_win, player);
-            }
-        }
-        update_status_display(status_win, player->obj.x, player->obj.y,game_speed,input);
+        random_enemy_spawn(main_win, config, hunters, hunters_count);
+        move_enemy_list(hunters, *hunters_count, main_win, player);
+        update_status_display(status_win, player->obj.x, player->obj.y,game_speed,input,player->life_force);
         draw_obj(player->obj, main_win);
         wnoutrefresh(main_win->window);
         mount_upd(status_win);

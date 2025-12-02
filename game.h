@@ -90,7 +90,7 @@ void init_ncurses();
 //graphic.c
 Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
-void update_status_display(Win* win, int x, int y,int gamespeed,char input);
+void update_status_display(Win* win, int x, int y,int gamespeed,char input,int hp);
 void mount_upd(Win* win);
 void draw_obj(const GameObject_t obj, Win* win);
 
