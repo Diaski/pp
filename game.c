@@ -51,10 +51,10 @@ int validate_input(char input, Player_t* player, int* game_speed, LevelConfig_t*
         return 1;
     }
     if(input == 'p' && *game_speed -config->delta_speed >= config->max_speed){
-        game_speed -= config->delta_speed;
+        *game_speed -= config->delta_speed;
     }
     if(input == 'o' && *game_speed +config->delta_speed <= config->min_speed){
-        game_speed += config->delta_speed;
+        *game_speed += config->delta_speed;
     }
     return 0;
 }
@@ -74,6 +74,7 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         if(validate_input(input, player, &game_speed, config, time_left)){
             break;
         }
+
         remove_obj_from_window(player->obj, main_win);
         handle_player_input(player, input,main_win,config);
         random_star_spawn(main_win, config, stars, stars_count);
