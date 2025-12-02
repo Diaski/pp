@@ -1,4 +1,5 @@
 #include "game.h"
+#include <ncurses.h>
 
 void init_ncurses() {
     initscr();

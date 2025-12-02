@@ -1,4 +1,4 @@
-SRC = main.c graphics.c init.c io.c physics.c funcs.c actors.c map.c
+SRC = main.c graphics.c init.c io.c physics.c funcs.c actors.c map.c game.c
 # Prefer clang when present, otherwise fall back to system cc
 CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 

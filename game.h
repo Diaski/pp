@@ -25,20 +25,12 @@
 #define ENEMY_SPRITE 'E'
 #define STAR_SPRITE '*'
 #define PLAYER_NAME_MAX 100
+#define STAR '*'
+#define MAX_STARS 1000
 
 typedef char** Map_t;
 
 typedef char* Sprite_t;
-
-typedef enum Colors{
-    white = WHITE_ON_BLACK_PAIR,
-    red = RED_ON_BLACK_PAIR,
-    yellow = YELLOW_ON_BLACK_PAIR,
-    green = GREEN_ON_BLACK_PAIR,
-    blue = BLUE_ON_BLACK_PAIR,
-    cyan = CYAN_ON_BLACK_PAIR,
-    meganta = MAGENTA_ON_BLACK_PAIR
-}Colors_t;
 
 typedef struct {
     Sprite_t left;
@@ -63,11 +55,12 @@ typedef struct {
 typedef struct {
     GameObject_t obj;
     int alive;
+    int fade_color;
 } Star_t;
 
 typedef struct{
     GameObject_t obj;
-    int life_force,score;
+    int life_force,stars;
     char name[PLAYER_NAME_MAX];
 }Player_t;
 
@@ -77,9 +70,8 @@ typedef struct {
     Map_t map;
 } Win;
 
-
 typedef struct {
-    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias,max_enemys_per_level;
+    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias,max_enemys_per_level,star_spawn_chance;
     Player_t* player;
     Enemy_t* hunters;
 } LevelConfig_t;
@@ -90,9 +82,12 @@ void init_ncurses();
 //graphic.c
 Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
-void update_status_display(Win* win, int x, int y,int gamespeed,char input,int hp);
+void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp);
 void mount_upd(Win* win);
 void draw_obj(const GameObject_t obj, Win* win);
+int display_level_selection_menu();
+char* player_name_window();
+void congratulate_player_win(char* player_name, int level_num);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
@@ -102,15 +97,18 @@ void copy_sprite(Sprite_t dest, const Sprite_t src);
 void calculate_damage(Enemy_t* enemy, int time_max, int time_left, int dmg_mult);
 
 //actors.c
-void handle_player_input(Player_t* p, char input, Win* win);
-int move_player(Player_t* p, Win* win);
+void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg);
+int move_player(Player_t* p, Win* win,LevelConfig_t* cfg);
 Player_t* create_player(LevelConfig_t* config);
 void destroy_player(Player_t* p);
 void setup_player_sprites(Player_t* p, LevelConfig_t* config);
 void remove_obj_from_window(GameObject_t obj, Win* win);
-Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type);
+Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left);
 void destroy_enemy_list(Enemy_t** enemy, int count);
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player);
+void move_star(Star_t* star, Win* win,Player_t* player);
+Star_t* spawn_star(Win* win);
+void free_star_list(Star_t** stars, int count);
 
 //map.c
 void create_map(Win* win);
@@ -121,5 +119,9 @@ void free_map(Map_t map, int size);
 //io.c
 LevelConfig_t* load_level_config(int level_num) ;
 void free_level_config(LevelConfig_t* config);
+
+//game.c
+int level_selector(int level_num, char* player_name);
+int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count, int level_num, Star_t** stars, int* stars_count);
 
 #endif

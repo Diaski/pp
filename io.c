@@ -37,7 +37,6 @@ void base_asignements(LevelConfig_t* config, char* key,int value) {
     if (strcmp(key, "status_cols") == 0) config->status_cols = value;
     if (strcmp(key, "time_limit_ms") == 0) config->time_limit_ms = value;
     if (strcmp(key, "star_quota") == 0) config->star_quota = value;
-    if (strcmp(key, "player_health") == 0) config->player_health = value;
     if (strcmp(key, "hunter_spawn_rate") == 0) config->hunter_spawn_rate = value;
     if (strcmp(key, "max_speed") == 0) config->max_speed = value;
     if (strcmp(key, "delta_speed") == 0) config->delta_speed = value;
@@ -47,6 +46,7 @@ void base_asignements(LevelConfig_t* config, char* key,int value) {
     if (strcmp(key, "score_star_bias") == 0) config->score_star_bias = value;
     if (strcmp(key, "seed") == 0) config->seed = value;
     if (strcmp(key, "max_enemys_per_level") == 0) config->max_enemys_per_level = value;
+    if (strcmp(key, "star_spawn_chance") == 0) config->star_spawn_chance = value;
 }
 
 void assign_values(LevelConfig_t* config, char* key,char line[256]) {
