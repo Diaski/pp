@@ -49,7 +49,7 @@ typedef struct {
 
 typedef struct {
     GameObject_t obj;
-    int bounces, damage, alive,sleep_after_dash,wanted_x,wanted_y,dashing;
+    int bounces, damage, alive,sleep_after_dash,dashing,dash_limit;
 } Enemy_t;
 
 typedef struct {
@@ -94,7 +94,7 @@ void remove_from_win_and_map(GameObject_t obj, Win* win);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
-int dash_to_player(Enemy_t* enemy, Player_t* player);
+int dash(Enemy_t* enemy,Player_t* player);
 int check_if_hit_player(GameObject_t obj,Map_t map);
 
 //funcs.c small functions to make code more readable

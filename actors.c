@@ -86,11 +86,10 @@ void setup_enemy_data_base_on_template(Enemy_t* enemy, Enemy_t template,int time
     enemy->obj.speed_y = template.obj.speed_y;
     enemy->obj.sprites_list = template.obj.sprites_list;
     enemy->obj.color = template.obj.color;
+    enemy->dash_limit = template.dash_limit;
     enemy->damage = calculate_damage(template.damage, config->time_limit_ms, time_left, config->damage_over_time_mult);
     enemy->alive = 1;
     enemy->sleep_after_dash = 3;
-    enemy->wanted_x = 0;
-    enemy->wanted_y = 0;
     enemy->dashing = 0;
     enemy->bounces = template.bounces;
     enemy->obj.current_sprite = enemy->obj.sprites_list.down;
@@ -107,14 +106,31 @@ Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
 }
 
 void enemy_movement(Enemy_t* enemy,Player_t* player,int collision){
-    int sleep=0;
-    if(collision == HORIZONTAL || collision == VERTICAL){
-        sleep = dash_to_player(enemy, player);
+    if(enemy->dashing ==1 || player->obj.x > enemy->obj.x){
+        if (enemy->dash_limit >0){
+            enemy->dashing = dash(enemy,player);
+        }
     }
-    if(sleep==0){
-        enemy->obj.x += enemy->obj.dx;
-        enemy->obj.y += enemy->obj.dy;
+    if(collision == HORIZONTAL){
+        enemy->obj.dx = -enemy->obj.dx;
+        if(enemy->bounces >0){
+            enemy->bounces--;
+        } else {
+            enemy->alive =0;
+            return;
+        }
     }
+    if(collision == VERTICAL){
+        enemy->obj.dy = -enemy->obj.dy;
+        if(enemy->bounces >0){
+            enemy->bounces--;
+        } else {
+            enemy->alive =0;
+            return;
+        }
+    }
+    enemy->obj.x += enemy->obj.dx;
+    enemy->obj.y += enemy->obj.dy;
 }
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
     int collision=detect_wall_collision(enemy->obj, win);

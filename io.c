@@ -86,6 +86,7 @@ void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* c
         else if (strcmp(attribute, "bounces") == 0) config->hunters[i].bounces = value;
         else if (strcmp(attribute, "damage") == 0) config->hunters[i].damage = value;
         else if (strcmp(attribute, "color") == 0) config->hunters[i].obj.color = value;
+        else if (strcmp(attribute, "dash_limit") == 0) config->hunters[i].dash_limit = value;
         else {
             load_sprites(attribute, string_val,&config->hunters[i].obj.sprites_list);
         }

@@ -23,28 +23,33 @@ int detect_wall_collision(GameObject_t obj, Win* win){
     }
     return 0;
 }
-void dash_calculate(Enemy_t* enemy, Player_t* player){
-    if(enemy->dashing ==0){
-        enemy->wanted_x = player->obj.x;
-        enemy->wanted_y = player->obj.y;
-        enemy->obj.dx = (player->obj.x - enemy->obj.x)/abs(player->obj.x - enemy->obj.x) * enemy->obj.speed_x;
-        enemy->obj.dy = (player->obj.y - enemy->obj.y)/abs(player->obj.y - enemy->obj.y) * enemy->obj.speed_y;
+void dash_calculate(Enemy_t* enemy,Player_t* player){
+    if (player->obj.x > enemy->obj.x){
+        enemy->obj.dx = enemy->obj.speed_x *2;
+    } else if (player->obj.x < enemy->obj.x){
+        enemy->obj.dx = -enemy->obj.speed_x *2;
+    } else {
+        enemy->obj.dx = 0;
     }
-    enemy->dashing =1;
+    if (player->obj.y > enemy->obj.y){
+        enemy->obj.dy = enemy->obj.speed_y *2;
+    } else if (player->obj.y < enemy->obj.y){
+        enemy->obj.dy = -enemy->obj.speed_y *2;
+    } else {
+        enemy->obj.dy = 0;
+    }
+    enemy->dashing =0;
+    enemy->sleep_after_dash =3;
+    enemy->dash_limit--;
 }
-int dash_to_player(Enemy_t* enemy, Player_t* player){
+int dash(Enemy_t* enemy,Player_t* player){
     if(enemy->sleep_after_dash >0){
+        enemy->obj.dx = 0;
+        enemy->obj.dy = 0;
         enemy->sleep_after_dash--;
         return 1;
     }
-    if(enemy->obj.x == enemy->wanted_x && enemy->obj.y == enemy->wanted_y ){
-        enemy->obj.dx = 0;
-        enemy->obj.dy = 0;
-        enemy->dashing = 0;
-        enemy->sleep_after_dash = 3;
-        return 0;
-    }
-    if (enemy->dashing ==0)dash_calculate(enemy, player);
+    if (enemy->sleep_after_dash ==0)dash_calculate(enemy,player);
     return 0;
 }
 
