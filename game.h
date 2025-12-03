@@ -49,7 +49,7 @@ typedef struct {
 
 typedef struct {
     GameObject_t obj;
-    int bounces, damage, alive;
+    int bounces, damage, alive,sleep_after_dash,wanted_x,wanted_y,dashing;
 } Enemy_t;
 
 typedef struct {
@@ -88,13 +88,17 @@ void draw_obj(const GameObject_t obj, Win* win);
 int display_level_selection_menu();
 char* player_name_window();
 void congratulate_player_win(char* player_name, int level_num);
+void change_sprite_base_on_direction(GameObject_t* obj);
+void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char);
+void remove_from_win_and_map(GameObject_t obj, Win* win);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
+int dash_to_player(Enemy_t* enemy, Player_t* player);
+int check_if_hit_player(GameObject_t obj,Map_t map);
 
 //funcs.c small functions to make code more readable
-void copy_sprite(Sprite_t dest, const Sprite_t src);
-void calculate_damage(Enemy_t* enemy, int time_max, int time_left, int dmg_mult);
+int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
 
 //actors.c
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg);

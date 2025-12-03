@@ -9,23 +9,7 @@ int move_player(Player_t* p, Win* win,LevelConfig_t* cfg){
     if(p->life_force <= (cfg->player->life_force / 2)){
         p->obj.color = RED_ON_BLACK_PAIR;
     }
-    if(p->obj.dx > 0){
-        p->obj.current_sprite = p->obj.sprites_list.right;
-        draw_to_map_obj(p->obj,win, PLAYER_SPRITE);
-        return 0;
-    } else if(p->obj.dx < 0){
-        p->obj.current_sprite = p->obj.sprites_list.left;
-        draw_to_map_obj(p->obj,win, PLAYER_SPRITE);
-        return 0;
-    } else if(p->obj.dy > 0){
-        p->obj.current_sprite = p->obj.sprites_list.down;
-        draw_to_map_obj(p->obj,win, PLAYER_SPRITE);
-        return 0;
-    } else if(p->obj.dy < 0){
-        p->obj.current_sprite = p->obj.sprites_list.up;
-        draw_to_map_obj(p->obj,win, PLAYER_SPRITE);
-        return 0;
-    }
+    change_sprite_base_on_direction(&p->obj);
     return 1;
 }
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg){
@@ -48,7 +32,7 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg){
             break;
     }
     move_player(p, win, cfg);
-    draw_obj(p->obj, win);
+    draw_to_win_and_map(p->obj, win, PLAYER_SPRITE);
 }
 Player_t* create_player(LevelConfig_t* config){
     Player_t* p = malloc(sizeof(Player_t));
@@ -70,7 +54,7 @@ Player_t* create_player(LevelConfig_t* config){
 void destroy_player(Player_t* p){
     free(p);
 }
-void enemy_random_data(Enemy_t* enemy,Win* win){
+void setup_enemy_in_win(Enemy_t* enemy,Win* win){
     if(rand()%2==0){
         if(rand()%2==0){
             enemy->obj.x = 1;
@@ -95,74 +79,54 @@ void enemy_random_data(Enemy_t* enemy,Win* win){
         enemy->obj.dx = 0;
     }
 }
-int check_if_hit_player(GameObject_t obj,Map_t map){
-    for(int row = 0; row < obj.height; row++){
-        for(int col = 0; col < obj.width; col++){
-            if(map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
-                return 1;
-            }
-        }
-    }
-    return 0;
+void setup_enemy_data_base_on_template(Enemy_t* enemy, Enemy_t template,int time_left, LevelConfig_t* config){
+    enemy->obj.width = template.obj.width;
+    enemy->obj.height = template.obj.height;
+    enemy->obj.speed_x = template.obj.speed_x;
+    enemy->obj.speed_y = template.obj.speed_y;
+    enemy->obj.sprites_list = template.obj.sprites_list;
+    enemy->obj.color = template.obj.color;
+    enemy->damage = calculate_damage(template.damage, config->time_limit_ms, time_left, config->damage_over_time_mult);
+    enemy->alive = 1;
+    enemy->sleep_after_dash = 3;
+    enemy->wanted_x = 0;
+    enemy->wanted_y = 0;
+    enemy->dashing = 0;
+    enemy->bounces = template.bounces;
+    enemy->obj.current_sprite = enemy->obj.sprites_list.down;
 }
 Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
     Enemy_t* enemy = malloc(sizeof(Enemy_t));
-    Enemy_t temp_enemy = config->hunters[type];
-    enemy->obj.width = temp_enemy.obj.width;
-    enemy->obj.height = temp_enemy.obj.height;
-    enemy->obj.speed_x = temp_enemy.obj.speed_x;
-    enemy->obj.speed_y = temp_enemy.obj.speed_y;
-    enemy->obj.sprites_list = temp_enemy.obj.sprites_list;
-    enemy->obj.color = temp_enemy.obj.color;
-    enemy->damage = temp_enemy.damage;
-    enemy->alive = 1;
-    enemy->bounces = temp_enemy.bounces;
-    enemy->obj.current_sprite = enemy->obj.sprites_list.down;
-    enemy_random_data(enemy,win);
-    while(check_if_hit_player(enemy->obj, win->map)){
-        enemy_random_data(enemy,win);
-    }
-    calculate_damage(enemy, config->time_limit_ms, time_left, config->damage_over_time_mult);
+    Enemy_t template_enemy = config->hunters[type];
+    setup_enemy_data_base_on_template(enemy, template_enemy, time_left, config);
+    do{
+        setup_enemy_in_win(enemy,win);
+    }while(check_if_hit_player(enemy->obj, win->map));
     draw_to_map_obj(enemy->obj, win, ENEMY_SPRITE);
     return enemy;
 }
+
+void enemy_movement(Enemy_t* enemy,Player_t* player,int collision){
+    int sleep=0;
+    if(collision == HORIZONTAL || collision == VERTICAL){
+        sleep = dash_to_player(enemy, player);
+    }
+    if(sleep==0){
+        enemy->obj.x += enemy->obj.dx;
+        enemy->obj.y += enemy->obj.dy;
+    }
+}
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
     int collision=detect_wall_collision(enemy->obj, win);
-    remove_from_map_obj(enemy->obj, win);
-    remove_obj_from_window(enemy->obj, win);
-    if(collision){
-        if(enemy->bounces-1 > 0){
-            if(collision == HORIZONTAL){
-                enemy->obj.dx = -enemy->obj.dx;
-                collision = detect_wall_collision(enemy->obj, win);
-            }
-            if (collision == VERTICAL){
-                enemy->obj.dy = -enemy->obj.dy;
-            }
-            enemy->bounces--;
-        } else {
-            enemy->alive = 0;
-            return;
-        }
-    }
-    enemy->obj.x += enemy->obj.dx;
-    enemy->obj.y += enemy->obj.dy;
-    if(enemy->obj.dx > 0){
-        enemy->obj.current_sprite = enemy->obj.sprites_list.right;
-    } else if(enemy->obj.dx < 0){
-        enemy->obj.current_sprite = enemy->obj.sprites_list.left;
-    } else if(enemy->obj.dy > 0){
-        enemy->obj.current_sprite = enemy->obj.sprites_list.down;
-    } else if(enemy->obj.dy < 0){
-        enemy->obj.current_sprite = enemy->obj.sprites_list.up;
-    }
+    remove_from_win_and_map(enemy->obj, win);
+    enemy_movement(enemy, player, collision);
+    change_sprite_base_on_direction(&enemy->obj);
     if(check_if_hit_player(enemy->obj, win->map)){
         player->life_force -= enemy->damage;
         enemy->alive = 0;
         return;
     }
-    draw_to_map_obj(enemy->obj,win, ENEMY_SPRITE);
-    draw_obj(enemy->obj, win);
+    draw_to_win_and_map(enemy->obj, win, ENEMY_SPRITE);
 }
 void destroy_enemy_list(Enemy_t** enemy, int count){
     for (int i = 0; i < count; i++) {
@@ -170,8 +134,7 @@ void destroy_enemy_list(Enemy_t** enemy, int count){
     }
     free(enemy);
 }
-Star_t* spawn_star(Win* win){
-    Star_t* star = malloc(sizeof(Star_t));
+void setup_star(Star_t* star, Win* win){
     star->obj.width = 1;
     star->obj.height = 1;
     star->obj.x = rand() % (win->cols - 2) + 1;
@@ -184,17 +147,18 @@ Star_t* spawn_star(Win* win){
     star->obj.current_sprite[0] = STAR;
     star->obj.current_sprite[1] = '\0';
     star->fade_color = YELLOW_ON_BLACK_PAIR;
-    draw_to_map_obj(star->obj, win, STAR);
-    draw_obj(star->obj, win);
+}
+Star_t* spawn_star(Win* win){
+    Star_t* star = malloc(sizeof(Star_t));
+    setup_star(star, win);
     return star;
 }
 void move_star(Star_t* star, Win* win,Player_t* player){
-    remove_obj_from_window(star->obj, win);
+    remove_from_win_and_map(star->obj, win);
     if(win->map[star->obj.y][star->obj.x] == ENEMY_SPRITE){
         star->alive = 0;
         return;
     }
-    remove_from_map_obj(star->obj, win);
     if(check_if_hit_player(star->obj, win->map)){
         star->alive = 0;
         player->stars += 1;
@@ -217,8 +181,7 @@ void move_star(Star_t* star, Win* win,Player_t* player){
         star->alive = 0;
         return;
     }
-    draw_to_map_obj(star->obj,win, STAR);
-    draw_obj(star->obj, win);
+    draw_to_win_and_map(star->obj, win, STAR);
 }
 void free_star_list(Star_t** stars, int count){
     for (int i = 0; i < count; i++) {

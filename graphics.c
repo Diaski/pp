@@ -133,3 +133,22 @@ int display_level_selection_menu(){
     free(win);
     return choice;
 }
+void change_sprite_base_on_direction(GameObject_t* obj){
+    if(obj->dx > 0){
+        obj->current_sprite = obj->sprites_list.right;
+    } else if(obj->dx < 0){
+        obj->current_sprite = obj->sprites_list.left;
+    } else if(obj->dy > 0){
+        obj->current_sprite = obj->sprites_list.down;
+    } else if(obj->dy < 0){
+        obj->current_sprite = obj->sprites_list.up;
+    }
+}
+void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char){
+    draw_to_map_obj(obj, win, map_char);
+    draw_obj(obj, win);
+}
+void remove_from_win_and_map(GameObject_t obj, Win* win){
+    remove_from_map_obj(obj, win);
+    remove_obj_from_window(obj, win);
+}

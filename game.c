@@ -2,7 +2,7 @@
 
 void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count,int time_left){
     if(rand()%config->hunter_spawn_rate==0 && *hunters_count < config->max_enemys_per_level){
-        Enemy_t* new_enemy=spawn_enemy(win, config, rand()%(config->hunter_type_count-1), time_left);
+        Enemy_t* new_enemy=spawn_enemy(win, config, rand()%(config->hunter_type_count), time_left);
         if(new_enemy != NULL){
             hunters[*hunters_count]=new_enemy;
             (*hunters_count)++;
