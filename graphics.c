@@ -3,7 +3,7 @@
 
 
 Win* create_window(int rows,int cols,int x, int y,int have_map) {
-    Win* win = malloc(sizeof(Win));
+    Win* win = (Win*)malloc(sizeof(Win));
     win->rows = rows;
     win->cols = cols;
     win->y = y;
@@ -95,7 +95,7 @@ void congratulate_player_win(char* player_name, int level_num){
     del_window(win);
 }
 char* player_name_window(){
-    char* name=malloc(sizeof(char)*PLAYER_NAME_MAX);
+    char* name=(char*)malloc(sizeof(char)*PLAYER_NAME_MAX);
     mvprintw(1, 2, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
     echo();
     getnstr(name, PLAYER_NAME_MAX -1);
@@ -122,7 +122,7 @@ int display_level_selection_menu(){
     mvwprintw(win->window,9,2,"Enter number: ");
     echo();
     wrefresh(win->window);
-    char choice_char = wgetch(win->window);
+    const char choice_char = wgetch(win->window);
     noecho();
     delwin(win->window);
     int choice = choice_char - '0';

@@ -9,7 +9,7 @@ void load_player(char* attribute,int value, char string_val[256], LevelConfig_t*
 void check_if_sprite_is_correct(GameObject_t* obj);
 
 LevelConfig_t* load_level_config(int level_num) {
-    LevelConfig_t* config = malloc(sizeof(LevelConfig_t));
+    LevelConfig_t* config = (LevelConfig_t*)malloc(sizeof(LevelConfig_t));
     config->player = NULL;
     config->hunters = NULL;
     char filename[128];
@@ -56,7 +56,7 @@ void assign_values(LevelConfig_t* config, char* key,char line[256]) {
             base_asignements( config, key, value);
             if (strcmp(key, "hunter_type_count") == 0) {
                 config->hunter_type_count = value;
-                config->hunters = malloc(sizeof(Enemy_t) * value);
+                config->hunters = (Enemy_t*)malloc(sizeof(Enemy_t) * value);
                 if(config->hunters == NULL) {
                     exit(1);
                 }
@@ -94,29 +94,29 @@ void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* c
 }
 void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list) {
     if (strcmp(attribute, "left") == 0) {
-        sprite_list->left = malloc(sizeof(char) * (strlen(value) + 1));
+        sprite_list->left = (char*)malloc(sizeof(char) * (strlen(value) + 1));
         strcpy(sprite_list->left, value);
     }
     else if (strcmp(attribute, "right") == 0) {
-        sprite_list->right = malloc(sizeof(char) * (strlen(value) + 1));
+        sprite_list->right = (char*)malloc(sizeof(char) * (strlen(value) + 1));
         strcpy(sprite_list->right, value);
     }
     else if (strcmp(attribute, "up") == 0) {
-        sprite_list->up = malloc(sizeof(char) * (strlen(value) + 1));
+        sprite_list->up = (char*)malloc(sizeof(char) * (strlen(value) + 1));
         strcpy(sprite_list->up, value);
     }
     else if (strcmp(attribute, "down") == 0) {
-        sprite_list->down = malloc(sizeof(char) * (strlen(value) + 1));
+        sprite_list->down = (char*)malloc(sizeof(char) * (strlen(value) + 1));
         strcpy(sprite_list->down, value);
     }
 }
 void load_player(char key[64],int value, char string_val[256], LevelConfig_t* config) {
-    char* prefix = "player_";
+    const char* prefix = "player_";
     if(strncmp(key, prefix, strlen(prefix)) != 0) return;
     char attribute[32];
     sscanf(key + strlen(prefix), "%[^=]", attribute);
     if (config->player == NULL) {
-        config->player = malloc(sizeof(Player_t));
+        config->player = (Player_t*)malloc(sizeof(Player_t));
         if(config->player == NULL) {
             exit(1);
         }

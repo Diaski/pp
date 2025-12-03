@@ -1,10 +1,10 @@
 #include "game.h"
 
 void create_game_map(Win* win){
-    win->map = calloc(sizeof(char*),win->rows);
+    win->map = (char**)calloc(sizeof(char*),win->rows);
     if (win->map!=NULL){
         for(int y=0;y<win->rows;y++){
-            win->map[y]=calloc(sizeof(char),win->cols);
+            win->map[y]=(char*)calloc(sizeof(char),win->cols);
             if (win->map[y]==NULL){
                 free_map(win->map,y);
                 exit(1);
@@ -40,6 +40,9 @@ void remove_from_map_obj(GameObject_t obj, Win* win){
 void draw_to_map_obj(GameObject_t obj, Win* win,char symbol){
     for(int row=0; row < obj.height; row++){
         for(int col=0; col < obj.width; col++){
+            if(win->rows <= obj.y + row || win->cols <= obj.x + col || obj.y + row <0 || obj.x + col <0){
+                return ;
+            }
             win->map[obj.y + row][obj.x + col] = symbol;
         }
     }   

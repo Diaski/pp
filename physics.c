@@ -53,10 +53,13 @@ int dash(Enemy_t* enemy,Player_t* player){
     return 0;
 }
 
-int check_if_hit_player(GameObject_t obj,Map_t map){
+int check_if_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height; row++){
         for(int col = 0; col < obj.width; col++){
-            if(map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
+            if(win->rows <= obj.y + row || win->cols <= obj.x + col || obj.y + row <0 || obj.x + col <0){
+                return 0;
+            }
+            if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
                 return 1;
             }
         }

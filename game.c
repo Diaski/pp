@@ -27,10 +27,10 @@ void move_star_list(Star_t** stars, int count, Win* win, Player_t* player){
         }
     }
 }
-void move_enemy_list(Enemy_t** enemy, int count, Win* win, Player_t* player){
+void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player){
     for (int i = 0; i < count; i++) {
-        if(enemy[i]->alive){
-            move_enemy(enemy[i], win, player);
+        if((*enemy)[i]->alive){
+            move_enemy((*enemy)[i], win, player);
         }
     }
 }
@@ -80,7 +80,7 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         random_star_spawn(main_win, config, stars, stars_count);
         move_star_list(stars, *stars_count, main_win, player);
         random_enemy_spawn(main_win, config, hunters, hunters_count, time_left);
-        move_enemy_list(hunters, *hunters_count, main_win, player);
+        move_enemy_list(&hunters, *hunters_count, main_win, player);
         update_status_display(status_win, player->name,level_num,time_left,player->stars,config->star_quota,player->life_force);
         wnoutrefresh(main_win->window);
         mount_upd(status_win);
@@ -114,8 +114,8 @@ void end_game(char* player_name, int level_num, int res){
 
 int level_selector(int level_num, char* player_name){
     LevelConfig_t* config = load_level_config(level_num);
-    Enemy_t** hunters=malloc(sizeof(Enemy_t*) * config->max_enemys_per_level);
-    Star_t** stars=malloc(sizeof(Star_t*) * config->max_enemys_per_level);
+    Enemy_t** hunters=(Enemy_t**)malloc(sizeof(Enemy_t*) * config->max_enemys_per_level);
+    Star_t** stars=(Star_t**)malloc(sizeof(Star_t*) * config->max_enemys_per_level);
     int stars_count=0;
     int hunters_count=0;
     if (check_config(config)){
@@ -126,14 +126,14 @@ int level_selector(int level_num, char* player_name){
     Win* status_win=create_window(config->status_rows,config->status_cols,0,config->map_rows,0);
     Player_t* player=create_player(config);
     strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
-    int game_speed = config->min_speed;
+    const int game_speed = config->min_speed;
     refresh();
     mount_upd(main_win);
     mount_upd(status_win);
     draw_obj(player->obj,main_win);
     wnoutrefresh(main_win->window);
     doupdate();
-    int res=game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count, level_num, stars, &stars_count);
+    const int res=game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count, level_num, stars, &stars_count);
     end_game(player_name, level_num, res);
     free_all_from_level(config, hunters, hunters_count, stars, stars_count, main_win, status_win, player);
     return res;
