@@ -127,6 +127,8 @@ void load_player(char key[64],int value, char string_val[256], LevelConfig_t* co
     else if (strcmp(attribute, "speed_y") == 0) config->player->obj.speed_y = value;
     else if (strcmp(attribute, "life_force") == 0) config->player->life_force = value;
     else if (strcmp(attribute, "color") == 0) config->player->obj.color = value;
+    else if (strcmp(attribute, "taxi_cooldown") == 0) config->player->taxi_cooldown = value;
+    else if (strcmp(attribute, "base_taxi_cooldown") == 0) config->player->base_taxi_cooldown = value;
     else load_sprites(attribute, string_val,&config->player->obj.sprites_list);
 }
 void check_if_sprite_is_correct(GameObject_t* obj) {

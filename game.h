@@ -27,6 +27,7 @@
 #define PLAYER_NAME_MAX 100
 #define STAR '*'
 #define MAX_STARS 1000
+#define TAXI_BASE_SPEED 1000
 
 typedef char** Map_t;
 
@@ -60,7 +61,7 @@ typedef struct {
 
 typedef struct{
     GameObject_t obj;
-    int life_force,stars;
+    int life_force,stars,wanted_x,wanted_y,taxi_cooldown,base_taxi_cooldown;
     char name[PLAYER_NAME_MAX];
 }Player_t;
 
@@ -101,7 +102,7 @@ int check_if_hit_player(GameObject_t obj,Win* win);
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
 
 //actors.c
-void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg);
+void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed);
 int move_player(Player_t* p, Win* win,LevelConfig_t* cfg);
 Player_t* create_player(LevelConfig_t* config);
 void destroy_player(Player_t* p);

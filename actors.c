@@ -12,7 +12,7 @@ int move_player(Player_t* p, Win* win,LevelConfig_t* cfg){
     change_sprite_base_on_direction(&p->obj);
     return 1;
 }
-void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg){
+void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed){
     switch(input){
         case 'w':
             p->obj.dx = 0;
@@ -30,6 +30,14 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg){
             p->obj.dx = p->obj.speed_x;
             p->obj.dy = 0;
             break;
+        case 'e':
+            if(p->taxi_cooldown ==0){
+                p->taxi_cooldown =5;
+            }
+            break;
+    }
+    if(p->taxi_cooldown >0){
+        p->taxi_cooldown-=game_speed;
     }
     move_player(p, win, cfg);
     draw_to_win_and_map(p->obj, win, PLAYER_SPRITE);
@@ -174,7 +182,6 @@ Star_t* spawn_star(Win* win){
     return star;
 }
 void move_star(Star_t* star, Win* win,Player_t* player){
-    remove_from_win_and_map(star->obj, win);
     if(win->map[star->obj.y][star->obj.x] == ENEMY_SPRITE){
         star->alive = 0;
         return;
@@ -184,7 +191,8 @@ void move_star(Star_t* star, Win* win,Player_t* player){
         player->stars += 1;
         return ;
     }
-    star->obj.y += 1;
+    remove_from_win_and_map(star->obj, win);
+    star->obj.y += star->obj.dy;
     if (star->obj.y <= (win->rows/2) == 0 ) {
         star->obj.color = star->fade_color;
     }

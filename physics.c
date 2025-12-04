@@ -28,15 +28,17 @@ void dash_calculate(Enemy_t* enemy,Player_t* player){
         enemy->obj.dx = enemy->obj.speed_x *2;
     } else if (player->obj.x < enemy->obj.x){
         enemy->obj.dx = -enemy->obj.speed_x *2;
-    } else {
-        enemy->obj.dx = 0;
+    }
+    else{
+        enemy->obj.dx =0;
     }
     if (player->obj.y > enemy->obj.y){
         enemy->obj.dy = enemy->obj.speed_y *2;
     } else if (player->obj.y < enemy->obj.y){
         enemy->obj.dy = -enemy->obj.speed_y *2;
-    } else {
-        enemy->obj.dy = 0;
+    }
+    else{
+        enemy->obj.dy =0;
     }
     enemy->dashing =0;
     enemy->sleep_after_dash =3;
@@ -56,7 +58,7 @@ int dash(Enemy_t* enemy,Player_t* player){
 int check_if_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height; row++){
         for(int col = 0; col < obj.width; col++){
-            if(win->rows <= obj.y + row || win->cols <= obj.x + col || obj.y + row <0 || obj.x + col <0){
+            if(win->rows <= obj.y + row || win->cols <= obj.x + col){
                 return 0;
             }
             if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){

@@ -63,20 +63,21 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
     if (hunters == NULL) {
         return(2);
     }
+    nodelay(stdscr, TRUE);
     int time_left = config->time_limit_ms;
     while (1)
     {   
-        nodelay(stdscr, TRUE);
         last_input = getch();
         if(last_input != ERR){       
             input = last_input;
         }
+        flushinp();
         if(validate_input(input, player, &game_speed, config, time_left)){
             break;
         }
 
         remove_obj_from_window(player->obj, main_win);
-        handle_player_input(player, input,main_win,config);
+        handle_player_input(player, input,main_win,config, game_speed);
         random_star_spawn(main_win, config, stars, stars_count);
         move_star_list(stars, *stars_count, main_win, player);
         random_enemy_spawn(main_win, config, hunters, hunters_count, time_left);
@@ -99,6 +100,9 @@ int check_config(LevelConfig_t* config){
         return 1;
     }
     if(config->seed == 0){
+        return 1;
+    }
+    if(config->max_enemys_per_level <0 ){
         return 1;
     }
     return 0;
