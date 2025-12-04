@@ -182,16 +182,22 @@ Star_t* spawn_star(Win* win){
     return star;
 }
 void move_star(Star_t* star, Win* win,Player_t* player){
-    if(win->map[star->obj.y][star->obj.x] == ENEMY_SPRITE){
-        star->alive = 0;
-        return;
-    }
     if(check_if_hit_player(star->obj, win)){
         star->alive = 0;
         player->stars += 1;
         return ;
     }
+    if(win->map[star->obj.y][star->obj.x] == ENEMY_SPRITE){
+        star->alive = 0;
+    }
     remove_from_win_and_map(star->obj, win);
+    if(check_if_star_hit_player(star->obj, win)){
+        star->alive = 0;
+        player->stars += 1;
+    }
+    if(star->alive ==0){
+        return;
+    }
     star->obj.y += star->obj.dy;
     if (star->obj.y <= (win->rows/2) == 0 ) {
         star->obj.color = star->fade_color;
@@ -200,7 +206,7 @@ void move_star(Star_t* star, Win* win,Player_t* player){
         star->alive = 0;
         return;
     }
-    if(check_if_hit_player(star->obj, win)){
+    if(check_if_star_hit_player(star->obj, win)){
         star->alive = 0;
         player->stars += 1;
         return ;

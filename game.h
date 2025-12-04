@@ -97,6 +97,7 @@ void remove_from_win_and_map(GameObject_t obj, Win* win);
 int detect_wall_collision(GameObject_t obj, Win* win);
 int dash(Enemy_t* enemy,Player_t* player);
 int check_if_hit_player(GameObject_t obj,Win* win);
+int check_if_star_hit_player(GameObject_t obj,Win* win);
 
 //funcs.c small functions to make code more readable
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);

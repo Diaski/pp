@@ -68,3 +68,16 @@ int check_if_hit_player(GameObject_t obj,Win* win){
     }
     return 0;
 }
+int check_if_star_hit_player(GameObject_t obj,Win* win){
+    for(int row = 0; row < obj.height+2; row++){
+        for(int col = 0; col < obj.width+2; col++){
+            if(win->rows <= obj.y + row -1 || win->cols <= obj.x + col -1){
+                return 0;
+            }
+            if(win->map[obj.y + row -1][obj.x + col-1] == PLAYER_SPRITE){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
