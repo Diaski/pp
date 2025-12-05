@@ -129,7 +129,7 @@ void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* c
 void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list);
 char* maloc_sprite(LevelConfig_t* config, int i);
 void assign_values(LevelConfig_t* config, char* key,char line[256]) ;
-void load_player(char* attribute,int value, char string_val[256], LevelConfig_t* config);
+void load_player(char key[64],int value, char string_val[256], LevelConfig_t* config);
 void check_if_sprite_is_correct(GameObject_t* obj);
 
 //game.c

@@ -134,10 +134,6 @@ void check_if_sprite_is_correct(GameObject_t* obj) {
         strlen(obj->sprites_list.right) != (unsigned int)((obj->width * obj->height)) ||
         strlen(obj->sprites_list.up) != (unsigned int)((obj->width * obj->height)) ||
         strlen(obj->sprites_list.down) != (unsigned int)((obj->width * obj->height))) {
-        printf("%zu\n", strlen(obj->sprites_list.left));
-        printf("%zu\n", strlen(obj->sprites_list.right));
-        printf("%zu\n", strlen(obj->sprites_list.up));
-        printf("%zu\n", strlen(obj->sprites_list.down));
         printf("Sprite size is incorect than width*height\n");
         exit(1);
     }
