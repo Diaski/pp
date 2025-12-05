@@ -86,6 +86,8 @@ void draw_sign_congratulations(char* player_name, int level_num,Win* win){
     doupdate();
 }
 void congratulate_player_win(char* player_name, int level_num){
+    clear();
+    refresh();
     Win* win=create_window(20,50,5,5,0);
     draw_border(win);
     draw_sign_congratulations(player_name, level_num, win);
@@ -109,8 +111,8 @@ char* player_name_window(){
 }
 
 int display_level_selection_menu(){
-    refresh();
     clear();
+    refresh();
     Win* win=create_window(20,40,5,5,0);
     draw_border(win);
     mvwprintw(win->window,2,2,"Select Level:");
@@ -120,11 +122,19 @@ int display_level_selection_menu(){
     mvwprintw(win->window,7,4,"4. Level 4");
     mvwprintw(win->window,8,4,"5. Level 5");
     mvwprintw(win->window,9,2,"Enter number: ");
+    mvwprintw(win->window,18,1,"press 'q' to quit");
     echo();
     wrefresh(win->window);
+    flushinp();
     const char choice_char = wgetch(win->window);
     noecho();
     delwin(win->window);
+    if(choice_char == 'q'){
+        clear();
+        refresh();
+        free(win);
+        return -1;
+    }
     int choice = choice_char - '0';
     if(choice < 1 || choice > 5){
         choice = 1;

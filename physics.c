@@ -25,17 +25,17 @@ int detect_wall_collision(GameObject_t obj, Win* win){
 }
 void dash_calculate(Enemy_t* enemy,Player_t* player){
     if (player->obj.x > enemy->obj.x){
-        enemy->obj.dx = enemy->obj.speed_x *2;
+        enemy->obj.dx = enemy->obj.speed_x *DASH_SPEED_MULTIPLIER;
     } else if (player->obj.x < enemy->obj.x){
-        enemy->obj.dx = -enemy->obj.speed_x *2;
+        enemy->obj.dx = -enemy->obj.speed_x *DASH_SPEED_MULTIPLIER;
     }
     else{
         enemy->obj.dx =0;
     }
     if (player->obj.y > enemy->obj.y){
-        enemy->obj.dy = enemy->obj.speed_y *2;
+        enemy->obj.dy = enemy->obj.speed_y *DASH_SPEED_MULTIPLIER;
     } else if (player->obj.y < enemy->obj.y){
-        enemy->obj.dy = -enemy->obj.speed_y *2;
+        enemy->obj.dy = -enemy->obj.speed_y *DASH_SPEED_MULTIPLIER;
     }
     else{
         enemy->obj.dy =0;
@@ -95,12 +95,12 @@ int check_if_hit_player(GameObject_t obj,Win* win){
     return check_if_obj_missed_player_when_moved(obj, win);
 }
 int check_if_star_hit_player(GameObject_t obj,Win* win){
-    for(int row = 0; row < obj.height+2; row++){
-        for(int col = 0; col < obj.width+2; col++){
-            if(win->rows <= obj.y + row -1 || win->cols <= obj.x + col -1){
+    for(int row = 0; row < obj.height+(STAR_FAIR_RANGE*2); row++){
+        for(int col = 0; col < obj.width+(STAR_FAIR_RANGE*2); col++){
+            if(win->rows <= obj.y + row -STAR_FAIR_RANGE || win->cols <= obj.x + col -STAR_FAIR_RANGE){
                 return 0;
             }
-            if(win->map[obj.y + row -1][obj.x + col-1] == PLAYER_SPRITE){
+            if(win->map[obj.y + row -STAR_FAIR_RANGE][obj.x + col-STAR_FAIR_RANGE] == PLAYER_SPRITE){
                 return 1;
             }
         }

@@ -28,6 +28,12 @@
 #define STAR '*'
 #define MAX_STARS 1000
 #define TAXI_BASE_SPEED 1000
+#define PLAYER_DIED 100
+#define WINNER 1
+#define BOUNCES_MULT_OVER_TIME 2
+#define STAR_FAIR_RANGE 1 // 1 means  x+1 y+1 and x-1 y-1 area so 1x1 becomes 3x3 area
+#define DASH_SPEED_MULTIPLIER 3
+#define STAR_FADE_CONVERSION_RATE 2 //means when it goes down by 1/n where n is this value its start to fade
 
 typedef char** Map_t;
 
@@ -101,6 +107,7 @@ int check_if_star_hit_player(GameObject_t obj,Win* win);
 
 //funcs.c small functions to make code more readable
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
+int calculate_bounces(int bounces,int time_max,int time_left);
 
 //actors.c
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed);
@@ -133,7 +140,7 @@ void load_player(char key[64],int value, char* string_val, LevelConfig_t* config
 void check_if_sprite_is_correct(GameObject_t* obj);
 
 //game.c
-int level_selector(int level_num, char* player_name);
+int level_selector(char* player_name);
 int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count, int level_num, Star_t** stars, int* stars_count);
 
 #endif

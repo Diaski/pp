@@ -13,6 +13,7 @@ int move_player(Player_t* p, Win* win,LevelConfig_t* cfg){
     return 1;
 }
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed){
+    remove_obj_from_window(p->obj, win);
     switch(input){
         case 'w':
             p->obj.dx = 0;
@@ -99,7 +100,7 @@ void setup_enemy_data_base_on_template(Enemy_t* enemy, Enemy_t temp,int time_lef
     enemy->alive = 1;
     enemy->sleep_after_dash = 3;
     enemy->dashing = 0;
-    enemy->bounces = temp.bounces;
+    enemy->bounces = calculate_bounces(temp.bounces, config->time_limit_ms, time_left);
     enemy->obj.current_sprite = enemy->obj.sprites_list.down;
 }
 Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
@@ -199,7 +200,7 @@ void move_star(Star_t* star, Win* win,Player_t* player){
         return;
     }
     star->obj.y += star->obj.dy;
-    if (star->obj.y >= (win->rows/2)) {
+    if (star->obj.y >= (win->rows/STAR_FADE_CONVERSION_RATE)) {
         star->obj.color = star->fade_color;
     }
     if(star->obj.y >= win->rows -1){

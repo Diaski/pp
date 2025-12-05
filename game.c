@@ -73,19 +73,22 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
         }
         flushinp();
         if(validate_input(input, player, &game_speed, config, time_left)){
-            break;
+            return PLAYER_DIED;
         }
 
-        remove_obj_from_window(player->obj, main_win);
         handle_player_input(player, input,main_win,config, game_speed);
+
         random_star_spawn(main_win, config, stars, stars_count);
         move_star_list(stars, *stars_count, main_win, player);
+
         random_enemy_spawn(main_win, config, hunters, hunters_count, time_left);
         move_enemy_list(&hunters, *hunters_count, main_win, player);
+
         update_status_display(status_win, player->name,level_num,time_left,player->stars,config->star_quota,player->life_force);
         wnoutrefresh(main_win->window);
         mount_upd(status_win);
         doupdate();
+
         input=0;
         usleep(game_speed * 1000);
         time_left -= game_speed;
@@ -95,17 +98,33 @@ int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed,L
     }
     return 1;
 }
+
 int check_config(LevelConfig_t* config){
+    int res=0;
     if (config == NULL) {
-        return 1;
+        res = 2;
     }
     if(config->seed == 0){
-        return 1;
+        res = 2;
     }
     if(config->max_enemys_per_level <0 ){
-        return 1;
+        res = 2;
     }
-    return 0;
+    if(LINES < config->map_rows + config->status_rows || COLS < config->map_cols){
+        res = 2;
+    }
+    if(config->player == NULL){
+        res = 2;
+    }
+    if(config->hunters == NULL){
+        res = 2;
+    }
+    if(res !=0){
+        free_level_config(config);
+        clear();
+        refresh();
+    }
+    return res;
 }
 
 void end_game(char* player_name, int level_num, int res){
@@ -115,30 +134,43 @@ void end_game(char* player_name, int level_num, int res){
         printf("Level failed or exited.\n");
     }
 }
-
-int level_selector(int level_num, char* player_name){
-    LevelConfig_t* config = load_level_config(level_num);
-    Enemy_t** hunters=(Enemy_t**)malloc(sizeof(Enemy_t*) * config->max_enemys_per_level);
-    Star_t** stars=(Star_t**)malloc(sizeof(Star_t*) * config->max_enemys_per_level);
-    int stars_count=0;
-    int hunters_count=0;
-    if (check_config(config)){
-        return 2;
+Win* s_win_create(LevelConfig_t* config,int x,int y,int have_map){ 
+    return create_window(config->map_rows,config->map_cols,x,y,have_map); //function to Make level selector cleaner for not writitng so many lines
+}
+int level_selector(char* player_name){
+    const int level_num = display_level_selection_menu();
+    if (level_num == -1){
+        return 4;
     }
 
+    LevelConfig_t* config = load_level_config(level_num);
+    int res = check_config(config);
+    if (res != 0){
+        return res;
+    }
+
+    Enemy_t** hunters=(Enemy_t**)malloc(sizeof(Enemy_t*) * config->max_enemys_per_level);
+    Star_t** stars=(Star_t**)malloc(sizeof(Star_t*) * config->max_enemys_per_level);
     Win* main_win=create_window(config->map_rows,config->map_cols,0,0,1);
     Win* status_win=create_window(config->status_rows,config->status_cols,0,config->map_rows,0);
     Player_t* player=create_player(config);
-    strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
+    int stars_count=0;
+    int hunters_count=0;
     const int game_speed = config->min_speed;
+    strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
+    
     refresh();
+
     mount_upd(main_win);
     mount_upd(status_win);
-    draw_obj(player->obj,main_win);
     wnoutrefresh(main_win->window);
     doupdate();
-    const int res=game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count, level_num, stars, &stars_count);
+
+    if(res==0) res = game_loop(main_win,status_win,player, game_speed,config,hunters,&hunters_count, level_num, stars, &stars_count);
+    
     end_game(player_name, level_num, res);
+    
     free_all_from_level(config, hunters, hunters_count, stars, stars_count, main_win, status_win, player);
+
     return res;
 }
