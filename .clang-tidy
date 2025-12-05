@@ -1,0 +1,20 @@
+
+# Enable the checks listed below
+Checks: '
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  readability-function-cognitive-complexity,
+  readability-non-const-parameter,
+  misc-unused-parameters,
+  -bugprone-easily-swappable-parameters
+'
+
+# Configure specific options for the checks
+CheckOptions:
+  # Ignore magic numbers 0, 1, and -1 (standard loops/errors)
+  - key:             readability-magic-numbers.IgnoredIntegerValues
+    value:           '0;1;-1'
+  # Warn if a function has a complexity score higher than 25
+  - key:             readability-function-cognitive-complexity.Threshold
+    value:           '25'

@@ -1,5 +1,6 @@
 #include "game.h"
 
+
 int detect_wall_collision(GameObject_t obj, Win* win){
     if(obj.dx >0){
         if(obj.x + obj.width + obj.dx >= win->cols ){
@@ -44,11 +45,16 @@ void dash_calculate(Enemy_t* enemy,Player_t* player){
     enemy->sleep_after_dash =3;
     enemy->dash_limit--;
 }
-int dash(Enemy_t* enemy,Player_t* player){
+int dash(Enemy_t* enemy,Player_t* player,Win* win){
     if(enemy->sleep_after_dash >0){
         enemy->obj.dx = 0;
         enemy->obj.dy = 0;
         enemy->sleep_after_dash--;
+        if(check_if_hit_player(enemy->obj, win) && enemy->alive){
+            player->life_force -= enemy->damage;
+            enemy->alive = 0;
+            return 0;
+        }
         return 1;
     }
     if (enemy->sleep_after_dash ==0)dash_calculate(enemy,player);
@@ -103,6 +109,29 @@ int check_if_star_hit_player(GameObject_t obj,Win* win){
             if(win->map[obj.y + row -STAR_FAIR_RANGE][obj.x + col-STAR_FAIR_RANGE] == PLAYER_SPRITE){
                 return 1;
             }
+        }
+    }
+    return 0;
+}
+int check_if_missed_player(GameObject_t* player, GameObject_t* enemy){
+    if(enemy->dx >0){
+        if(enemy->x >= player->x){
+            return 1;
+        }
+    }
+    else if (enemy->dx <0){
+        if(enemy->x <= player->x){
+            return 1;
+        }
+    }
+    if(enemy->dy >0){
+        if(enemy->y + enemy->height >= player->y){
+            return 1;
+        }
+    }
+    else if (enemy->dy <0){
+        if(enemy->y <= player->y + player->height){
+            return 1;
         }
     }
     return 0;

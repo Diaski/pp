@@ -1,0 +1,227 @@
+clang-tidy main.c graphics.c init.c io.c physics.c funcs.c actors.c map.c game.c -- -O0 -g -Wall -Werror -Wpedantic -Wshadow -Wconversion -std=c23 -D_XOPEN_SOURCE_EXTENDED -Wextra -fsanitize=undefined -fno-omit-frame-pointer -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -fsanitize=address -MMD -MP
+/home/diaski/pp/actors.c:165:10: warning: multilevel pointer conversion from 'Enemy_t **' to 'void *', please use explicit cast [bugprone-multi-level-implicit-pointer-conversion]
+  165 |     free(enemy);
+      |          ^
+/home/diaski/pp/game.c:84:12: warning: 1st function call argument is an uninitialized value [clang-analyzer-core.CallAndMessage]
+   84 |         if(validate_input(input, p, &g_speed, cfg, time_left)){
+      |            ^
+/home/diaski/pp/game.c:149:9: note: Assuming the condition is false
+  149 |     if (level_num == -1){
+      |         ^~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:149:5: note: Taking false branch
+  149 |     if (level_num == -1){
+      |     ^
+/home/diaski/pp/game.c:155:9: note: 'res' is equal to 0
+  155 |     if (res != 0){
+      |         ^~~
+/home/diaski/pp/game.c:155:5: note: Taking false branch
+  155 |     if (res != 0){
+      |     ^
+/home/diaski/pp/game.c:176:8: note: 'res' is equal to 0
+  176 |     if(res==0) res = game_loop(main_win,status_win,player, game_speed,cfg,hunters,&hunters_count, level_num, stars, &stars_count);
+      |        ^~~
+/home/diaski/pp/game.c:176:5: note: Taking true branch
+  176 |     if(res==0) res = game_loop(main_win,status_win,player, game_speed,cfg,hunters,&hunters_count, level_num, stars, &stars_count);
+      |     ^
+/home/diaski/pp/game.c:176:22: note: Calling 'game_loop'
+  176 |     if(res==0) res = game_loop(main_win,status_win,player, game_speed,cfg,hunters,&hunters_count, level_num, stars, &stars_count);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:71:10: note: 'input' declared without an initial value
+   71 |     char input,last_input;
+      |          ^~~~~
+/home/diaski/pp/game.c:72:9: note: Assuming 'hunters' is not equal to NULL
+   72 |     if (hunters == NULL) {
+      |         ^~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:72:5: note: Taking false branch
+   72 |     if (hunters == NULL) {
+      |     ^
+/home/diaski/pp/game.c:77:5: note: Loop condition is true.  Entering loop body
+   77 |     while (1)
+      |     ^
+/home/diaski/pp/game.c:80:12: note: Assuming the condition is false
+   80 |         if(last_input != ERR){       
+      |            ^~~~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:80:9: note: Taking false branch
+   80 |         if(last_input != ERR){       
+      |         ^
+/home/diaski/pp/game.c:84:12: note: 1st function call argument is an uninitialized value
+   84 |         if(validate_input(input, p, &g_speed, cfg, time_left)){
+      |            ^              ~~~~~
+/home/diaski/pp/game.c:114:8: warning: Access to field 'seed' results in a dereference of a null pointer (loaded from variable 'config') [clang-analyzer-core.NullDereference]
+  114 |     if(config->seed == 0){
+      |        ^
+/home/diaski/pp/game.c:149:9: note: Assuming the condition is false
+  149 |     if (level_num == -1){
+      |         ^~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:149:5: note: Taking false branch
+  149 |     if (level_num == -1){
+      |     ^
+/home/diaski/pp/game.c:153:5: note: 'cfg' initialized here
+  153 |     LevelConfig_t* cfg = load_level_config(level_num);
+      |     ^~~~~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:154:28: note: Passing 'cfg' via 1st parameter 'config'
+  154 |     int res = check_config(cfg);
+      |                            ^~~
+/home/diaski/pp/game.c:154:15: note: Calling 'check_config'
+  154 |     int res = check_config(cfg);
+      |               ^~~~~~~~~~~~~~~~~
+/home/diaski/pp/game.c:111:9: note: Assuming 'config' is equal to NULL
+  111 |     if (config == NULL) {
+      |         ^~~~~~~~~~~~~~
+/home/diaski/pp/game.c:111:5: note: Taking true branch
+  111 |     if (config == NULL) {
+      |     ^
+/home/diaski/pp/game.c:114:8: note: Access to field 'seed' results in a dereference of a null pointer (loaded from variable 'config')
+  114 |     if(config->seed == 0){
+      |        ^~~~~~
+/home/diaski/pp/game.c:167:5: warning: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  167 |     strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
+      |     ^~~~~~~
+/home/diaski/pp/game.c:167:5: note: Call to function 'strncpy' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'strncpy_s' in case of C11
+  167 |     strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
+      |     ^~~~~~~
+/home/diaski/pp/graphics.c:110:9: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+  110 |         strcpy(name, "Player1");
+      |         ^~~~~~
+/home/diaski/pp/graphics.c:110:9: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+  110 |         strcpy(name, "Player1");
+      |         ^~~~~~
+/home/diaski/pp/io.c:12:5: warning: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   12 |     snprintf(filename, sizeof(filename), "data/level%d.conf", level_num);
+      |     ^~~~~~~~
+/home/diaski/pp/io.c:12:5: note: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11
+   12 |     snprintf(filename, sizeof(filename), "data/level%d.conf", level_num);
+      |     ^~~~~~~~
+/home/diaski/pp/io.c:51:13: warning: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   51 |         if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+      |             ^~~~~~
+/home/diaski/pp/io.c:51:13: note: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11
+   51 |         if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+      |             ^~~~~~
+/home/diaski/pp/io.c:55:45: warning: calloc is called with a tainted (potentially attacker controlled) value. Make sure the value is bound checked [clang-analyzer-optin.taint.TaintedAlloc]
+   55 |                 config->hunters = (Enemy_t*)calloc((unsigned int)value, sizeof(Enemy_t));
+      |                                             ^
+/home/diaski/pp/io.c:13:18: note: Taint originated here
+   13 |     FILE* file = fopen(filename, "r");
+      |                  ^~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:13:18: note: Taint propagated to the return value
+   13 |     FILE* file = fopen(filename, "r");
+      |                  ^~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:13:18: note: Assuming that 'fopen' is successful
+   13 |     FILE* file = fopen(filename, "r");
+      |                  ^~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:14:9: note: 'file' is not equal to NULL
+   14 |     if (file == NULL) {
+      |         ^~~~
+/home/diaski/pp/io.c:14:5: note: Taking false branch
+   14 |     if (file == NULL) {
+      |     ^
+/home/diaski/pp/io.c:18:12: note: Taint propagated to the 1st argument
+   18 |     while (fgets(line, sizeof(line), file)) {
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:18:5: note: Loop condition is true.  Entering loop body
+   18 |     while (fgets(line, sizeof(line), file)) {
+      |     ^
+/home/diaski/pp/io.c:19:13: note: Assuming the condition is false
+   19 |         if (line[0] == '#' || line[0] == '\n') continue;
+      |             ^~~~~~~~~~~~~~
+/home/diaski/pp/io.c:19:13: note: Left side of '||' is false
+/home/diaski/pp/io.c:19:31: note: Assuming the condition is false
+   19 |         if (line[0] == '#' || line[0] == '\n') continue;
+      |                               ^~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:19:9: note: Taking false branch
+   19 |         if (line[0] == '#' || line[0] == '\n') continue;
+      |         ^
+/home/diaski/pp/io.c:20:9: note: Calling 'assign_values'
+   20 |         assign_values(config, key,line);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:51:13: note: Taint propagated to the 4th argument
+   51 |         if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:51:13: note: Assuming the condition is true
+   51 |         if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:51:9: note: Taking true branch
+   51 |         if (sscanf(line, "%[^=]=%d", key, &value)== 2) {
+      |         ^
+/home/diaski/pp/io.c:53:17: note: Assuming the condition is true
+   53 |             if (strcmp(key, "hunter_type_count") == 0) {
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:53:13: note: Taking true branch
+   53 |             if (strcmp(key, "hunter_type_count") == 0) {
+      |             ^
+/home/diaski/pp/io.c:55:45: note: calloc is called with a tainted (potentially attacker controlled) value. Make sure the value is bound checked
+   55 |                 config->hunters = (Enemy_t*)calloc((unsigned int)value, sizeof(Enemy_t));
+      |                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:63:17: warning: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   63 |         else if(sscanf(line, "%[^=]=%s", key, attribute) == 2) {
+      |                 ^~~~~~
+/home/diaski/pp/io.c:63:17: note: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11
+   63 |         else if(sscanf(line, "%[^=]=%s", key, attribute) == 2) {
+      |                 ^~~~~~
+/home/diaski/pp/io.c:74:9: warning: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   74 |         snprintf(prefix, sizeof(prefix), "hunter_%d_", i+1);
+      |         ^~~~~~~~
+/home/diaski/pp/io.c:74:9: note: Call to function 'snprintf' is insecure as it does not provide security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'snprintf_s' in case of C11
+   74 |         snprintf(prefix, sizeof(prefix), "hunter_%d_", i+1);
+      |         ^~~~~~~~
+/home/diaski/pp/io.c:77:9: warning: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+   77 |         sscanf(key + strlen(prefix), "%[^=]", attribute);
+      |         ^~~~~~
+/home/diaski/pp/io.c:77:9: note: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11
+   77 |         sscanf(key + strlen(prefix), "%[^=]", attribute);
+      |         ^~~~~~
+/home/diaski/pp/io.c:94:9: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+   94 |         strcpy(sprite_list->left, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:94:9: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+   94 |         strcpy(sprite_list->left, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:98:9: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+   98 |         strcpy(sprite_list->right, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:98:9: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+   98 |         strcpy(sprite_list->right, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:102:9: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+  102 |         strcpy(sprite_list->up, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:102:9: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+  102 |         strcpy(sprite_list->up, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:106:9: warning: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119 [clang-analyzer-security.insecureAPI.strcpy]
+  106 |         strcpy(sprite_list->down, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:106:9: note: Call to function 'strcpy' is insecure as it does not provide bounding of the memory buffer. Replace unbounded copy functions with analogous functions that support length arguments such as 'strlcpy'. CWE-119
+  106 |         strcpy(sprite_list->down, value);
+      |         ^~~~~~
+/home/diaski/pp/io.c:113:5: warning: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11 [clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling]
+  113 |     sscanf(key + strlen(prefix), "%[^=]", attribute);
+      |     ^~~~~~
+/home/diaski/pp/io.c:113:5: note: Call to function 'sscanf' is insecure as it does not provide bounding of the memory buffer or security checks introduced in the C11 standard. Replace with analogous functions that support length arguments or provides boundary checks such as 'sscanf_s' in case of C11
+  113 |     sscanf(key + strlen(prefix), "%[^=]", attribute);
+      |     ^~~~~~
+/home/diaski/pp/io.c:131:9: warning: Dereference of null pointer [clang-analyzer-core.NullDereference]
+  131 |     if (obj->sprites_list.left == NULL ||
+      |         ^
+/home/diaski/pp/io.c:9:5: note: Null pointer value stored to field 'player'
+    9 |     config->player = NULL;
+      |     ^~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:14:9: note: 'file' is not equal to NULL
+   14 |     if (file == NULL) {
+      |         ^~~~
+/home/diaski/pp/io.c:14:5: note: Taking false branch
+   14 |     if (file == NULL) {
+      |     ^
+/home/diaski/pp/io.c:18:5: note: Loop condition is false. Execution continues on line 22
+   18 |     while (fgets(line, sizeof(line), file)) {
+      |     ^
+/home/diaski/pp/io.c:23:32: note: Passing null pointer value via 1st parameter 'obj'
+   23 |     check_if_sprite_is_correct(&config->player->obj);
+      |                                ^~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:23:5: note: Calling 'check_if_sprite_is_correct'
+   23 |     check_if_sprite_is_correct(&config->player->obj);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/diaski/pp/io.c:131:9: note: Dereference of null pointer
+  131 |     if (obj->sprites_list.left == NULL ||
+      |         ^~~~~~~~~~~~~~~~~~~~~~

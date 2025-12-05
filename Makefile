@@ -6,8 +6,10 @@ CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw 2>/dev/null || pkg-config --cflags ncurses 2>/dev/null || echo "-I/usr/include")
 NCURSES_LIBS := $(shell pkg-config --libs ncursesw 2>/dev/null || pkg-config --libs ncurses 2>/dev/null || echo "-lncursesw")
 
-CFLAGS = -O0 -g -Wall -Werror -Wextra $(NCURSES_CFLAGS) -fsanitize=address
-LDFLAGS =
+CFLAGS = -O3 -g -Wall -Werror -Wpedantic -Wshadow -Wconversion -std=c23 \
+         -D_XOPEN_SOURCE_EXTENDED -Wextra -fsanitize=undefined \
+         -fno-omit-frame-pointer $(NCURSES_CFLAGS) -fsanitize=address \
+         -MMD -MP
 
 LDLIBS = $(NCURSES_LIBS)
 
@@ -20,4 +22,7 @@ swallow: $(SRC)
 clean:
 	rm -f swallow  
 
-.phony: all clean
+lint:
+	clang-tidy $(SRC) -- $(CFLAGS)
+
+.phony: lint

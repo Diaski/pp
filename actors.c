@@ -33,9 +33,10 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,in
             break;
         case 'e':
             if(p->taxi_cooldown ==0){
-                p->taxi_cooldown =5;
+                p->taxi_cooldown = p->base_taxi_cooldown;
             }
             break;
+        default: break;
     }
     if(p->taxi_cooldown >0){
         p->taxi_cooldown-=game_speed;
@@ -44,11 +45,11 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,in
     draw_to_win_and_map(p->obj, win, PLAYER_SPRITE);
 }
 Player_t* create_player(LevelConfig_t* config){
-    Player_t* p = (Player_t*)malloc(sizeof(Player_t));
+    Player_t* p = (Player_t*)calloc(1,sizeof(Player_t));
     p->obj.width=config->player->obj.width;
     p->obj.height=config->player->obj.height;
-    p->obj.x = 10;
-    p->obj.y = 10;
+    p->obj.x = PLAYER_BASE_SPAWN_X;
+    p->obj.y = PLAYER_BASE_SPAWN_Y;
     p->obj.speed_x = config->player->obj.speed_x;
     p->obj.speed_y = config->player->obj.speed_y;
     p->obj.dx = 0;
@@ -104,7 +105,7 @@ void setup_enemy_data_base_on_template(Enemy_t* enemy, Enemy_t temp,int time_lef
     enemy->obj.current_sprite = enemy->obj.sprites_list.down;
 }
 Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
-    Enemy_t* enemy = (Enemy_t*)malloc(sizeof(Enemy_t));
+    Enemy_t* enemy = (Enemy_t*)calloc(1,sizeof(Enemy_t));
     const Enemy_t template_enemy = config->hunters[type];
     setup_enemy_data_base_on_template(enemy, template_enemy, time_left, config);
     do{
@@ -115,9 +116,9 @@ Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
 }
 
 void enemy_movement(Enemy_t* enemy,Player_t* player,Win* win){
-    if(enemy->dashing ==1 || (enemy->obj.x < player->obj.x+enemy->obj.width && enemy->obj.dx <0) || (enemy->obj.x + player->obj.width > player->obj.x && enemy->obj.dx >0) || (enemy->obj.y < player->obj.y + enemy->obj.height && enemy->obj.dy <0) || (enemy->obj.y + enemy->obj.height > player->obj.y && enemy->obj.dy >0)){
+    if(check_if_missed_player(&player->obj, &enemy->obj) || enemy->dashing){
         if (enemy->dash_limit >0){
-            enemy->dashing = dash(enemy,player);
+            enemy->dashing = dash(enemy,player,win);
         }
     }
     int collision = detect_wall_collision(enemy->obj, win);
@@ -159,9 +160,9 @@ void move_enemy(Enemy_t* enemy, Win* win, Player_t* player){
 }
 void destroy_enemy_list(Enemy_t** enemy, int count){
     for (int i = 0; i < count; i++) {
-        free(enemy[i]);
+        free((void*)enemy[i]);
     }
-    free(enemy);
+    free((void*)enemy);
 }
 void setup_star(Star_t* star, Win* win){
     star->obj.width = 1;
@@ -172,13 +173,13 @@ void setup_star(Star_t* star, Win* win){
     star->obj.dy = 1;
     star->obj.color = WHITE_ON_BLACK_PAIR;
     star->alive = 1;
-    star->obj.current_sprite = (Sprite_t)malloc(sizeof(char) * 2);
+    star->obj.current_sprite = (Sprite_t)calloc(2,sizeof(char));
     star->obj.current_sprite[0] = STAR;
     star->obj.current_sprite[1] = '\0';
     star->fade_color = YELLOW_ON_BLACK_PAIR;
 }
 Star_t* spawn_star(Win* win){
-    Star_t* star = (Star_t*)malloc(sizeof(Star_t));
+    Star_t* star = (Star_t*)calloc(1,sizeof(Star_t));
     setup_star(star, win);
     return star;
 }
@@ -220,8 +221,8 @@ void move_star(Star_t* star, Win* win,Player_t* player){
 }
 void free_star_list(Star_t** stars, int count){
     for (int i = 0; i < count; i++) {
-        free(stars[i]->obj.current_sprite);
+        free((void*)stars[i]->obj.current_sprite);
         free(stars[i]);
     }
-    free(stars);
+    free((void*)stars);
 }

@@ -1,9 +1,12 @@
 #include "game.h"
+#include <ncurses.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 Win* create_window(int rows,int cols,int x, int y,int have_map) {
-    Win* win = (Win*)malloc(sizeof(Win));
+    Win* win = (Win*)calloc(1,sizeof(Win));
     win->rows = rows;
     win->cols = cols;
     win->y = y;
@@ -25,11 +28,10 @@ void draw_border(Win* win) {
 
 void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp){
     wattron(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
-    mvwprintw(win->window, 1, 2, "Player: %s", name);
+    mvwprintw(win->window, 1, 2, "Player: %s || Life Force: %-4d", name,hp);
     mvwprintw(win->window, 2, 2, "Level: %d", level);
-    mvwprintw(win->window, 3, 2, "Time Left: %-4d", time_left/1000);
+    mvwprintw(win->window, 3, 2, "Time Left: %-4d", time_left/USC_T_MSC);
     mvwprintw(win->window, 4, 2, "Stars: %d/%-2d", stars, stars_quota);
-    mvwprintw(win->window, 5, 2, "Life Force: %-4d", hp);
     wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
 }
 void draw_Welcome_Screen(Win* screen){
@@ -41,7 +43,7 @@ void mount_upd(Win* win){
 }
 void del_window(Win* win){
     delwin(win->window);
-    free(win);
+    free((void*)win);
 }
 
 void remove_obj_from_window(GameObject_t obj, Win* win){
@@ -80,7 +82,7 @@ void draw_sign_congratulations(char* player_name, int level_num,Win* win){
     mvwprintw(win->window, 2, 2, "Congratulations, %s!", player_name);
     wnoutrefresh(win->window);
     doupdate();
-    usleep(1000000);
+    usleep(CONGRATULATIONS_SLEEP_TIME_USC);
     mvwprintw(win->window, 4, 2, "You have completed Level %d!", level_num);
     wnoutrefresh(win->window);
     doupdate();
@@ -88,59 +90,63 @@ void draw_sign_congratulations(char* player_name, int level_num,Win* win){
 void congratulate_player_win(char* player_name, int level_num){
     clear();
     refresh();
-    Win* win=create_window(20,50,5,5,0);
+    Win* win=create_window(CONGRATULATIONS_WIN_ROWS,CONGRATULATIONS_WIN_COLS,CONGRATULATIONS_WIN_X,CONGRATULATIONS_WIN_Y,0);
     draw_border(win);
     draw_sign_congratulations(player_name, level_num, win);
-    usleep(1000000);
+    usleep(CONGRATULATIONS_SLEEP_TIME_USC);
     clear();
     refresh();
     del_window(win);
 }
-char* player_name_window(){
-    char* name=(char*)malloc(sizeof(char)*PLAYER_NAME_MAX);
-    mvprintw(1, 2, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
+char* player_name_window(void){
+    char* name=(char*)calloc(PLAYER_NAME_MAX,sizeof(char));
+    Win* win = create_window(5, 40, 1, 1, 0);
+    mvwprintw(win->window, 1, 2, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
     echo();
-    getnstr(name, PLAYER_NAME_MAX -1);
+    wgetnstr(win->window, name, PLAYER_NAME_MAX -1);
     noecho();
     clear();
     refresh();
     if(strlen(name) == 0){
         strcpy(name, "Player1");
     }
+
+    del_window(win);
     return name;
 }
 
-int display_level_selection_menu(){
+int display_level_selection_menu(void){
     clear();
     refresh();
-    Win* win=create_window(20,40,5,5,0);
+    int counter =2;
+    Win* win=create_window(LEVEL_WIN_ROWS,LEVEL_WIN_COLS,LEVEL_WIN_X,LEVEL_WIN_Y,0);
     draw_border(win);
     mvwprintw(win->window,2,2,"Select Level:");
-    mvwprintw(win->window,4,4,"1. Level 1");
-    mvwprintw(win->window,5,4,"2. Level 2");
-    mvwprintw(win->window,6,4,"3. Level 3");
-    mvwprintw(win->window,7,4,"4. Level 4");
-    mvwprintw(win->window,8,4,"5. Level 5");
-    mvwprintw(win->window,9,2,"Enter number: ");
-    mvwprintw(win->window,18,1,"press 'q' to quit");
+    for (int i=0;i<MAX_LEVELS+1;i++){
+        if(i>=LEVEL_WIN_ROWS-4) break;
+        mvwprintw(win->window,4+i,4,"1. Level %c", '1'+i);
+        counter++;
+    }
+    mvwprintw(win->window,counter+1,2,"Enter number: ");
+    mvwprintw(win->window,LEVEL_WIN_ROWS-2,1,"press 'q' to quit");
     echo();
     wrefresh(win->window);
     flushinp();
-    const char choice_char = wgetch(win->window);
+    const char choice_char = (char)wgetch(win->window);
     noecho();
     delwin(win->window);
     if(choice_char == 'q'){
         clear();
         refresh();
-        free(win);
+        free((void*)win);
         return -1;
     }
     int choice = choice_char - '0';
-    if(choice < 1 || choice > 5){
+    if(choice < 1 || choice > MAX_LEVELS){
         choice = 1;
     }
     clear();
-    free(win);
+    free((void*)win);
     return choice;
 }
 void change_sprite_base_on_direction(GameObject_t* obj){

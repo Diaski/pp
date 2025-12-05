@@ -1,7 +1,7 @@
 #include "game.h"
 #include <ncurses.h>
 
-void init_ncurses() {
+void init_ncurses(void) {
     initscr();
     start_color();
     noecho();

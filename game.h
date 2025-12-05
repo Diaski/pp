@@ -2,13 +2,6 @@
 #define GAME_H
 
 #include <ncurses.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include <string.h>
-#include <unistd.h>
-
 
 #define WHITE_ON_BLACK_PAIR 1
 #define RED_ON_BLACK_PAIR 2
@@ -30,10 +23,33 @@
 #define TAXI_BASE_SPEED 1000
 #define PLAYER_DIED 100
 #define WINNER 1
-#define BOUNCES_MULT_OVER_TIME 2
+#define BOUNCES_MULT_OVER_TIME 3
 #define STAR_FAIR_RANGE 1 // 1 means  x+1 y+1 and x-1 y-1 area so 1x1 becomes 3x3 area
-#define DASH_SPEED_MULTIPLIER 3
+#define DASH_SPEED_MULTIPLIER 2
 #define STAR_FADE_CONVERSION_RATE 2 //means when it goes down by 1/n where n is this value its start to fade
+#define MAX_FILE_NAME_LENGTH 128
+#define MAX_LINE_LENGTH 256
+#define MAX_KEY_LENGTH 64
+#define MAX_ATTRIBUTE_LENGTH 64
+#define MAX_PREFIX_LENGTH 32
+#define PLAYER_BASE_SPAWN_X 6
+#define PLAYER_BASE_SPAWN_Y 6
+#define USC_T_MSC 1000 
+#define CONGRATULATIONS_SLEEP_TIME_USC 1000000
+#define CONGRATULATIONS_WIN_ROWS 20
+#define CONGRATULATIONS_WIN_COLS 50
+#define CONGRATULATIONS_WIN_X 5
+#define CONGRATULATIONS_WIN_Y 5
+#define LEVEL_WIN_ROWS 20
+#define LEVEL_WIN_COLS 50
+#define LEVEL_WIN_X 5
+#define LEVEL_WIN_Y 5
+#define MAX_LEVELS 5
+#define LOADING_CONFIG_ERROR 2
+#define TERMINAL_SIZE_ERROR 3
+#define MALLOC_ERROR 4
+#define EXIT_GAME 5
+
 
 typedef char** Map_t;
 
@@ -84,7 +100,7 @@ typedef struct {
 } LevelConfig_t;
 
 //init.c
-void init_ncurses();
+void init_ncurses(void);
 
 //graphic.c
 Win* create_window(int rows,int cols,int x, int y,int have_map);
@@ -92,18 +108,20 @@ void draw_border(Win* win);
 void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp);
 void mount_upd(Win* win);
 void draw_obj(const GameObject_t obj, Win* win);
-int display_level_selection_menu();
-char* player_name_window();
+int display_level_selection_menu(void);
+char* player_name_window(void);
 void congratulate_player_win(char* player_name, int level_num);
 void change_sprite_base_on_direction(GameObject_t* obj);
 void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char);
 void remove_from_win_and_map(GameObject_t obj, Win* win);
+void del_window(Win* win);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
-int dash(Enemy_t* enemy,Player_t* player);
+int dash(Enemy_t* enemy,Player_t* player,Win* win);
 int check_if_hit_player(GameObject_t obj,Win* win);
 int check_if_star_hit_player(GameObject_t obj,Win* win);
+int check_if_missed_player(GameObject_t* player, GameObject_t* enemy);
 
 //funcs.c small functions to make code more readable
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
@@ -132,11 +150,11 @@ void free_map(Map_t map, int size);
 //io.c
 LevelConfig_t* load_level_config(int level_num) ;
 void free_level_config(LevelConfig_t* config);
-void load_hunters(char key[64], int value,char* string_val, LevelConfig_t* config, int count);
-void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list);
+void load_hunters(char* key, int value,char* string_val, LevelConfig_t* config, int count);
+void load_sprites(char* attribute, char* value,SpriteList_t* sprite_list);
 char* maloc_sprite(LevelConfig_t* config, int i);
-void assign_values(LevelConfig_t* config, char* key,char line[256]) ;
-void load_player(char key[64],int value, char* string_val, LevelConfig_t* config);
+void assign_values(LevelConfig_t* config, char* key,char* line) ;
+void load_player(char* key,int value, char* string_val, LevelConfig_t* config);
 void check_if_sprite_is_correct(GameObject_t* obj);
 
 //game.c
