@@ -64,7 +64,7 @@ void assign_values(LevelConfig_t* config, char* key,char line[256]) {
         }
 }
 
-void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count) {
+void load_hunters(char key[64], int value,char* string_val, LevelConfig_t* config, int count) {
     for(int i=0; i < count; i++) {
         char prefix[32];
         snprintf(prefix, sizeof(prefix), "hunter_%d_", i+1);
@@ -102,7 +102,7 @@ void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list) {
         strcpy(sprite_list->down, value);
     }
 }
-void load_player(char key[64],int value, char string_val[256], LevelConfig_t* config) {
+void load_player(char key[64],int value, char* string_val, LevelConfig_t* config) {
     const char* prefix = "player_";
     if(strncmp(key, prefix, strlen(prefix)) != 0) return;
     char attribute[32];

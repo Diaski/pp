@@ -199,7 +199,7 @@ void move_star(Star_t* star, Win* win,Player_t* player){
         return;
     }
     star->obj.y += star->obj.dy;
-    if (star->obj.y <= (win->rows/2) == 0 ) {
+    if (star->obj.y >= (win->rows/2)) {
         star->obj.color = star->fade_color;
     }
     if(star->obj.y >= win->rows -1){

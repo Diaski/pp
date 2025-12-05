@@ -1,10 +1,10 @@
 #include "game.h"
 
 void create_game_map(Win* win){
-    win->map = (char**)calloc(sizeof(char*),win->rows);
+    win->map = (char**)malloc(sizeof(char*) * win->rows);
     if (win->map!=NULL){
         for(int y=0;y<win->rows;y++){
-            win->map[y]=(char*)calloc(sizeof(char),win->cols);
+            win->map[y]=(char*)malloc(sizeof(char) * win->cols);
             if (win->map[y]==NULL){
                 free_map(win->map,y);
                 exit(1);
