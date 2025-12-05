@@ -125,6 +125,12 @@ void free_map(Map_t map, int size);
 //io.c
 LevelConfig_t* load_level_config(int level_num) ;
 void free_level_config(LevelConfig_t* config);
+void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count);
+void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list);
+char* maloc_sprite(LevelConfig_t* config, int i);
+void assign_values(LevelConfig_t* config, char* key,char line[256]) ;
+void load_player(char* attribute,int value, char string_val[256], LevelConfig_t* config);
+void check_if_sprite_is_correct(GameObject_t* obj);
 
 //game.c
 int level_selector(int level_num, char* player_name);

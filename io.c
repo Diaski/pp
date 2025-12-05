@@ -1,13 +1,5 @@
 #include "game.h"
 
-// co linijke fgets() sscanf by podzielić na key i value i zwrócić wartość dla target_key przypisując go do structa LevelConfig i osobno dla hunterów
-void load_hunters(char key[64], int value,char string_val[256], LevelConfig_t* config, int count);
-void load_sprites(char* attribute, char value[256],SpriteList_t* sprite_list);
-char* maloc_sprite(LevelConfig_t* config, int i);
-void assign_values(LevelConfig_t* config, char* key,char line[256]) ;
-void load_player(char* attribute,int value, char string_val[256], LevelConfig_t* config);
-void check_if_sprite_is_correct(GameObject_t* obj);
-
 LevelConfig_t* load_level_config(int level_num) {
     LevelConfig_t* config = (LevelConfig_t*)malloc(sizeof(LevelConfig_t));
     config->player = NULL;
@@ -138,11 +130,15 @@ void check_if_sprite_is_correct(GameObject_t* obj) {
         obj->sprites_list.down == NULL) {
         exit(1);
     }
-    if(strlen(obj->sprites_list.left) < (unsigned int)(obj->width * obj->height) ||
-       strlen(obj->sprites_list.right) < (unsigned int)(obj->width * obj->height) ||
-       strlen(obj->sprites_list.up) < (unsigned int)(obj->width * obj->height) ||
-       strlen(obj->sprites_list.down) < (unsigned int)(obj->width * obj->height)) {
-        printf("Sprite size is smaller than width*height\n");
+    if(strlen(obj->sprites_list.left) != (unsigned int)((obj->width * obj->height)) ||
+        strlen(obj->sprites_list.right) != (unsigned int)((obj->width * obj->height)) ||
+        strlen(obj->sprites_list.up) != (unsigned int)((obj->width * obj->height)) ||
+        strlen(obj->sprites_list.down) != (unsigned int)((obj->width * obj->height))) {
+        printf("%zu\n", strlen(obj->sprites_list.left));
+        printf("%zu\n", strlen(obj->sprites_list.right));
+        printf("%zu\n", strlen(obj->sprites_list.up));
+        printf("%zu\n", strlen(obj->sprites_list.down));
+        printf("Sprite size is incorect than width*height\n");
         exit(1);
     }
 }

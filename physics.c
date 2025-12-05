@@ -54,19 +54,45 @@ int dash(Enemy_t* enemy,Player_t* player){
     if (enemy->sleep_after_dash ==0)dash_calculate(enemy,player);
     return 0;
 }
-
+int check_if_obj_missed_player_when_moved(GameObject_t obj, Win* win){
+    int changey =0;
+    int changex =0;
+    if(obj.dy >0){
+        changey = -1;
+    }
+    if(obj.dy <0){
+        changey = 1;
+    }
+    if(obj.dx >0){
+        changex = -1;
+    }
+    if(obj.dx <0){
+        changex = 1;
+    }
+    for(int row = obj.dy; row < 0; row+=changey){
+        for(int col = obj.dx; col < 0; col+=changex){
+            if(win->rows <= obj.y + row  || win->cols <= obj.x + col || obj.y + row <0 || obj.x + col <0){
+                continue;
+            }
+            if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
 int check_if_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height; row++){
         for(int col = 0; col < obj.width; col++){
             if(win->rows <= obj.y + row || win->cols <= obj.x + col){
-                return 0;
+                continue;
             }
             if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
                 return 1;
             }
         }
     }
-    return 0;
+    return check_if_obj_missed_player_when_moved(obj, win);
 }
 int check_if_star_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height+2; row++){
