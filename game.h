@@ -35,6 +35,8 @@
 #define PLAYER_BASE_SPAWN_X 6
 #define PLAYER_BASE_SPAWN_Y 6
 #define USC_T_MSC 1000 
+#define GET_PLAYER_NAME_WIN_ROWS 5
+#define GET_PLAYER_NAME_WIN_COLS (PLAYER_NAME_MAX + 3)
 #define CONGRATULATIONS_SLEEP_TIME_USC 2000000
 #define CONGRATULATIONS_WIN_ROWS 20
 #define CONGRATULATIONS_WIN_COLS (PLAYER_NAME_MAX + 2) //prefered to be PLAYER_NAME_MAX + 2 can be changed but display doesnt support it well
@@ -45,10 +47,13 @@
 #define LEVEL_WIN_X 5
 #define LEVEL_WIN_Y 5
 #define MAX_LEVELS 5
+#define DEFAULT_LEVEL 2
+#define MIN_LEVEL 1
 #define LOADING_CONFIG_ERROR 2
 #define TERMINAL_SIZE_ERROR 3
+#define FILE_ERROR 606
 #define MALLOC_ERROR 4
-#define EXIT_GAME 5
+#define EXIT_GAME 505
 #define LEADERBOARD_WIN_ROWS 20
 #define LEADERBOARD_WIN_COLS 50
 #define LEADERBOARD_WIN_X 5
@@ -60,7 +65,20 @@
 #define TAXI_HEIGHT 1
 #define TAXI_SPEED 1
 #define TAXI_SPRITE ".[T]."
-
+#define L_MARGIN 1
+#define T_MARGIN 1
+#define MIN_WIN_ROWS 10
+#define MIN_WIN_COLS 20
+#define ALIVE 1
+#define DEAD 0
+#define DEFAULT_PLAYER_NAME "Player1"
+#define BOUNCES_CHANGE -1
+#define MAP_EMPTY ' '
+#define PLAYER_CHANGE_COLOR_THRESHOLD 2 //when life force is less than half change color
+#define TAXI_SAFE_RANGE 1
+#define MAX_TAXI_SPAWN_ATTEMPTS 100
+#define SPAWN_STAR_Y 1
+#define STAR_SCORE 1
 
 typedef char** Map_t;
 
@@ -128,7 +146,7 @@ typedef struct {
     int damage_over_time_mult;
     int score_time_bias;
     int score_star_bias;
-    int max_enemys_per_level;
+    int max_enemys;
     int star_spawn_chance;
     Player_t* player;
     Enemy_t* hunters;
@@ -141,44 +159,22 @@ void init_ncurses(void);
 Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
 void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp);
-void mount_upd(Win* win);
 void draw_obj(const GameObject_t obj, Win* win);
 int display_level_selection_menu(void);
-char* player_name_window(void);
-void congratulate_player_win(char* player_name, int level_num);
+char* get_player_name_window(void);
+void congratulate_player_win(char* player_name, int level_num,int res);
 void change_sprite_base_on_direction(GameObject_t* obj);
 void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char);
 void remove_from_win_and_map(GameObject_t obj, Win* win);
 void del_window(Win* win);
-void show_leaderboard(void);
 void change_blink_sprite_base_on_direction(Player_t* p);
+void remove_obj_from_window(GameObject_t obj, Win* win);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
-int dash(Enemy_t* enemy,Player_t* player);
 int check_if_hit_player(GameObject_t obj,Win* win);
 int check_if_star_hit_player(GameObject_t obj,Win* win);
 int check_if_missed_player(GameObject_t* player, GameObject_t* enemy);
-
-//funcs.c small functions to make code more readable
-int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
-int calculate_bounces(int bounces,int time_max,int time_left);
-int calculate_score(LevelConfig_t* level_config,Player_t* player,int time_max, int time_left);
-
-//actors.c
-void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
-int move_player(Player_t* p, Win* win,int only_draw);
-Player_t* create_player(LevelConfig_t* config);
-void destroy_player(Player_t* p);
-void setup_player_sprites(Player_t* p, LevelConfig_t* config);
-void remove_obj_from_window(GameObject_t obj, Win* win);
-Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left);
-void destroy_enemy_list(Enemy_t** enemy, int count);
-void move_enemy(Enemy_t* enemy, Win* win, Player_t* player,int only_draw);
-void move_star(Star_t* star, Win* win,Player_t* player,int only_draw);
-Star_t* spawn_star(Win* win);
-void free_star_list(Star_t** stars, int count);
-void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
 int reverse_when_touch_border(GameObject_t* obj, Win* win);
 
 //map.c
@@ -189,20 +185,58 @@ void free_map(Map_t map, int size);
 int detect_if_spot_hunter(Win* win, int x, int y,int width, int height);
 
 //io.c
-LevelConfig_t* load_level_config(int level_num) ;
-void free_level_config(LevelConfig_t* config);
-void load_hunters(char* key, int value,char* string_val, LevelConfig_t* config, int count);
+LevelConfig_t* load_level_config(int level_num);
+void assign_values(LevelConfig_t* config, char* key,char* line);
+void base_asignements(LevelConfig_t* c, char* k,int v);
+void load_hunters(char* k, int v,char* string_val, LevelConfig_t* cfg, int count);
+void load_player(char* k,int v, char* string_val, LevelConfig_t* c);
 void load_sprites(char* attr, char* value,SpriteList_t* sprite_list);
-char* maloc_sprite(LevelConfig_t* config, int i);
-void assign_values(LevelConfig_t* config, char* key,char* line) ;
-void load_player(char* key,int value, char* string_val, LevelConfig_t* config);
-void check_if_sprite_is_correct(GameObject_t* obj);
-int save_to_leaderboard(char* player_name, int score);
+void load_blink_sprites(char* attr, char* value,SpriteList_t* sprite_list);
+void check_if_sprite_loaded_correct(GameObject_t* obj);
+void check_if_blink_loaded_correct(Player_t* p);
+int check_config(LevelConfig_t* config);
+void free_level_config(LevelConfig_t* config);
+
+//leaderboard.c
 LeaderboardEntry_t* load_leaderboard_entries(int entry_count);
+int save_to_leaderboard(char* player_name, int score);
+void free_leaderboard_entries(LeaderboardEntry_t* entries, int entry_count);
+int count_leaderboard_entries(void);
+void show_leaderboard(void);
 
 //game.c
-int level_selector(char* player_name);
-void move_star_list(Star_t** stars, int count, Win* win, Player_t* player,int only_draw);
-void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player,int only_draw);
-int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count, int level_num, Star_t** stars, int* stars_count);
+int validate_input(char input, Player_t* player, int* game_speed, LevelConfig_t* config, int time_left);
+void end_of_tick(int game_speed,int* time_left);
+void free_all_from_level(LevelConfig_t* config, Enemy_t** hunters, int hunters_count, Star_t** stars, int stars_count, Win* main_win, Win* status_win, Player_t* player);
+void end_level(char* player_name, int level_num, int res, int score);
+int level_selector(char* p_name);
+int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConfig_t* cfg,Enemy_t** hunters,int* hunters_count,int level_num, Star_t** stars,int* stars_count,int* time_left);
+
+//star.c
+void random_star_spawn(Win* win, LevelConfig_t* config, Star_t** stars, int* stars_count);
+void move_star_list(Star_t** stars, int stars_count, Win* win,Player_t* player,int only_draw);
+void move_star(Star_t* star, Win* win,Player_t* player,int only_draw);
+Star_t* spawn_star(Win* win);
+void free_star_list(Star_t** stars, int count);
+
+//enemy.c
+Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left);
+void setup_enemy_data_base_on_template(Enemy_t* enemy, Enemy_t temp,int time_left, LevelConfig_t* config);
+void setup_enemy_in_window(Enemy_t* enemy, Win* win);
+void move_enemy(Enemy_t* enemy, Win* win, Player_t* player,int only_draw);
+void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int* hunters_c,int time_left);
+void move_enemy_list(Enemy_t*** hunters, int hunters_count, Win* win, Player_t* player,int only_draw);
+int dash(Enemy_t* enemy,Player_t* player);
+int calculate_damage(int damage, int time_max, int time_left, int dmg_mul);
+int calculate_bounces(int bounces,int time_max,int time_left);
+void destroy_enemy_list(Enemy_t** enemy, int count);
+
+//player.c
+Player_t* create_player(LevelConfig_t* config);
+int move_player(Player_t* p, Win* win,int only_draw);
+void setup_player_sprites(Player_t* p, LevelConfig_t* config);
+void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
+void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);void destroy_player(Player_t* p);
+int calculate_score(LevelConfig_t* level_config,Player_t* player,int time_max, int time_left);
+
 #endif

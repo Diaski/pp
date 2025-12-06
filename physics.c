@@ -22,39 +22,9 @@ int detect_wall_collision(GameObject_t obj, Win* win){
             return VERTICAL;
         }
     }
-    return 0;
+    return false;
 }
-void dash_calculate(Enemy_t* enemy,Player_t* player){
-    if (player->obj.x > enemy->obj.x){
-        enemy->obj.dx = enemy->obj.speed_x *DASH_SPEED_MULTIPLIER;
-    } else if (player->obj.x < enemy->obj.x){
-        enemy->obj.dx = -enemy->obj.speed_x *DASH_SPEED_MULTIPLIER;
-    }
-    else{
-        enemy->obj.dx =0;
-    }
-    if (player->obj.y > enemy->obj.y){
-        enemy->obj.dy = enemy->obj.speed_y *DASH_SPEED_MULTIPLIER;
-    } else if (player->obj.y < enemy->obj.y){
-        enemy->obj.dy = -enemy->obj.speed_y *DASH_SPEED_MULTIPLIER;
-    }
-    else{
-        enemy->obj.dy =0;
-    }
-    enemy->dashing =0;
-    enemy->sleep_after_dash =enemy->base_dash_sleep_time;
-    enemy->dash_limit--;
-}
-int dash(Enemy_t* enemy,Player_t* player){
-    if(enemy->sleep_after_dash >0){
-        enemy->obj.dx = 0;
-        enemy->obj.dy = 0;
-        enemy->sleep_after_dash--;
-        return 1;
-    }
-    if (enemy->sleep_after_dash ==0)dash_calculate(enemy,player);
-    return 0;
-}
+
 int check_if_obj_missed_player_when_moved(GameObject_t obj, Win* win){
     int changey =0;
     int changex =0;
@@ -76,12 +46,13 @@ int check_if_obj_missed_player_when_moved(GameObject_t obj, Win* win){
                 continue;
             }
             if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
-                return 0;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
+
 int check_if_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height; row++){
         for(int col = 0; col < obj.width; col++){
@@ -89,45 +60,62 @@ int check_if_hit_player(GameObject_t obj,Win* win){
                 continue;
             }
             if(win->map[obj.y + row][obj.x + col] == PLAYER_SPRITE){
-                return 1;
+                return true;
             }
         }
     }
     return check_if_obj_missed_player_when_moved(obj, win);
 }
+
 int check_if_star_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height+(STAR_FAIR_RANGE*2); row++){
         for(int col = 0; col < obj.width+(STAR_FAIR_RANGE*2); col++){
             if(win->rows <= obj.y + row -STAR_FAIR_RANGE || win->cols <= obj.x + col -STAR_FAIR_RANGE){
-                return 0;
+                return false;
             }
             if(win->map[obj.y + row -STAR_FAIR_RANGE][obj.x + col-STAR_FAIR_RANGE] == PLAYER_SPRITE){
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
+
 int check_if_missed_player(GameObject_t* player, GameObject_t* enemy){
     if(enemy->dx >0){
         if(enemy->x >= player->x){
-            return 1;
+            return true;
         }
     }
     else if (enemy->dx <0){
         if(enemy->x <= player->x){
-            return 1;
+            return true;
         }
     }
     if(enemy->dy >0){
         if(enemy->y + enemy->height >= player->y){
-            return 1;
+            return true;
         }
     }
     else if (enemy->dy <0){
         if(enemy->y <= player->y + player->height){
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
+}
+
+int reverse_when_touch_border(GameObject_t* obj, Win* win){
+    int jumped=0;
+    int collision = detect_wall_collision(*obj, win);
+    if(collision == HORIZONTAL){
+        obj->dx = -obj->dx;
+        jumped=true;
+    }
+    collision = detect_wall_collision(*obj, win);
+    if(collision == VERTICAL){
+        obj->dy = -obj->dy;
+        jumped=true;
+    }
+    return jumped;
 }

@@ -1,2 +1,2 @@
-swallow: game.c game.h
+swallow: physics.c game.h
 game.h:

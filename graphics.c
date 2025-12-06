@@ -5,7 +5,6 @@
 #include <string.h>
 #include <math.h>
 
-
 Win* create_window(int rows,int cols,int x, int y,int have_map) {
     Win* win = (Win*)calloc(1,sizeof(Win));
     win->rows = rows;
@@ -29,19 +28,13 @@ void draw_border(Win* win) {
 
 void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp){
     wattron(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
-    mvwprintw(win->window, 1, 2, "Player: %s || Life Force: %-4d", name,hp);
-    mvwprintw(win->window, 2, 2, "Level: %d", level);
-    mvwprintw(win->window, 3, 2, "Time Left: %-4d", time_left/USC_T_MSC);
-    mvwprintw(win->window, 4, 2, "Stars: %d/%-2d", stars, stars_quota);
+    mvwprintw(win->window, T_MARGIN, L_MARGIN, "Player: %s || Life Force: %-3d", name,hp);
+    mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, "Level: %d", level);
+    mvwprintw(win->window, T_MARGIN + 2, L_MARGIN, "Time Left: %-4d", time_left/USC_T_MSC);
+    mvwprintw(win->window, T_MARGIN + 3, L_MARGIN, "Stars: %d/%-3d", stars, stars_quota);
     wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
 }
-void draw_Welcome_Screen(Win* screen){
-    draw_border(screen);
-    //to be done//
-}
-void mount_upd(Win* win){
-    wnoutrefresh(win->window);
-}
+
 void del_window(Win* win){
     delwin(win->window);
     free((void*)win);
@@ -54,6 +47,7 @@ void remove_obj_from_window(GameObject_t obj, Win* win){
         }
     }
 }
+
 void select_color(GameObject_t obj,Win* win){
     if(obj.color > 0 && obj.color <= COLOR_PAIR_COUNT){
         wattron(win->window, COLOR_PAIR(obj.color));
@@ -62,6 +56,8 @@ void select_color(GameObject_t obj,Win* win){
         wattron(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
     }
 }
+
+
 void deselect_color(GameObject_t obj,Win* win){
     if(obj.color > 0 && obj.color <= COLOR_PAIR_COUNT){
         wattroff(win->window, COLOR_PAIR(obj.color));
@@ -70,6 +66,7 @@ void deselect_color(GameObject_t obj,Win* win){
         wattroff(win->window, COLOR_PAIR(WHITE_ON_BLACK_PAIR));
     }
 }
+
 void draw_obj(const GameObject_t obj, Win* win){
     select_color(obj,win);
     for(int row = 0; row < obj.height; row++){
@@ -79,81 +76,98 @@ void draw_obj(const GameObject_t obj, Win* win){
     }
     deselect_color(obj,win);
 }
-
-void draw_sign_congratulations(char* player_name, int level_num,Win* win){
+//display congratulations sign with player name and level number everything is centered unless name is too long or level number is too big
+//its drawing in parts to create a small animation effect
+void draw_sign_congratulations(char* player_name, int level_num,Win* win,int res){
     wattron(win->window, COLOR_PAIR(RED_ON_BLACK_PAIR));
-    mvwprintw(win->window, 2,  (CONGRATULATIONS_WIN_COLS - 25) / 2, "Congratulations! GOOD JOB"); //its 25 because "Congratulations!" has 25 chars and i want to avoid unnecessary calculations
-    mvwprintw(win->window, 3,  (CONGRATULATIONS_WIN_COLS - (int)strlen(player_name)) / 2, "%s", player_name);
+    if(res==0){
+        mvwprintw(win->window, T_MARGIN,  (CONGRATULATIONS_WIN_COLS - 25) / 2, "Congratulations! GOOD JOB"); //its 25 because "Congratulations!" has 25 chars and i want to avoid unnecessary calculations
+        mvwprintw(win->window, T_MARGIN + 1,  (CONGRATULATIONS_WIN_COLS - (int)strlen(player_name)) / 2, "%s", player_name);
+    }
+    else if(res==EXIT_GAME){
+        mvwprintw(win->window, T_MARGIN,  (CONGRATULATIONS_WIN_COLS - 27) / 2, "Level Incomplete! TRY AGAIN"); 
+    }
+    else {
+        mvwprintw(win->window, T_MARGIN,  (CONGRATULATIONS_WIN_COLS - 11) / 2, "GAME OVER!"); 
+    }
     wnoutrefresh(win->window);
     doupdate();
     usleep(CONGRATULATIONS_SLEEP_TIME_USC);
-    mvwprintw(win->window, 4,  (CONGRATULATIONS_WIN_COLS - 27 - (int)log10(level_num)) / 2, "You have completed Level %d!", level_num); //its 27 because same case as above
-    wnoutrefresh(win->window);
-    doupdate();
+    if(res==0){
+        mvwprintw(win->window, T_MARGIN + 2,  (CONGRATULATIONS_WIN_COLS - 27 - (int)log10(level_num)) / 2, "You have completed Level %d!!", level_num);
+        wnoutrefresh(win->window);
+        doupdate();
+    }
     wattroff(win->window, COLOR_PAIR(RED_ON_BLACK_PAIR));
 }
-void congratulate_player_win(char* player_name, int level_num){
+//display congrats and wait for some time
+void congratulate_player_win(char* player_name, int level_num,int res){
     clear();
     refresh();
-    Win* win=create_window(CONGRATULATIONS_WIN_ROWS,CONGRATULATIONS_WIN_COLS,CONGRATULATIONS_WIN_X,CONGRATULATIONS_WIN_Y,0);
-    draw_sign_congratulations(player_name, level_num, win);
+    Win* win=create_window(CONGRATULATIONS_WIN_ROWS,CONGRATULATIONS_WIN_COLS,CONGRATULATIONS_WIN_X,CONGRATULATIONS_WIN_Y,false);
+    draw_sign_congratulations(player_name, level_num, win,res);
     usleep(CONGRATULATIONS_SLEEP_TIME_USC);
     clear();
     refresh();
     del_window(win);
 }
-char* player_name_window(void){
+//get player name from input window
+char* get_player_name_window(void){
     char* name=(char*)calloc(PLAYER_NAME_MAX,sizeof(char));
-    Win* win = create_window(5, PLAYER_NAME_MAX+2, 1, 1, 0);
-    mvwprintw(win->window, 1, 2, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
-    mvwprintw(win->window, 2, 2, "");
+    Win* win = create_window(GET_PLAYER_NAME_WIN_ROWS, GET_PLAYER_NAME_WIN_COLS, 0, 0, false);
+    mvwprintw(win->window, T_MARGIN, L_MARGIN, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
+    mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, "");
     echo();
     wgetnstr(win->window, name, PLAYER_NAME_MAX -1);
     noecho();
     clear();
     refresh();
     if(strlen(name) == 0){
-        strcpy(name, "Player1");
+        strcpy(name, DEFAULT_PLAYER_NAME); //default name if none provided
     }
 
     del_window(win);
     return name;
 }
-
+//display level selection menu and get user choice
+//if pressed q return EXIT_GAME
 int display_level_selection_menu(void){
     clear();
     refresh();
-    int counter =2;
+    int counter =T_MARGIN;
     Win* win=create_window(LEVEL_WIN_ROWS,LEVEL_WIN_COLS,LEVEL_WIN_X,LEVEL_WIN_Y,0);
+
     draw_border(win);
-    mvwprintw(win->window,2,2,"Select Level:");
-    for (int i=0;i<MAX_LEVELS+1;i++){
+    mvwprintw(win->window,T_MARGIN,L_MARGIN,"Select Level:");
+    for (int i=MIN_LEVEL-1;i<MAX_LEVELS;i++){
         if(i>=LEVEL_WIN_ROWS-4) break;
-        mvwprintw(win->window,4+i,4,"%c. Level %c",'1'+i, '1'+i);
+        mvwprintw(win->window,T_MARGIN+1+i,L_MARGIN,"%c. Level %c",'1'+i, '1'+i);
         counter++;
     }
-    mvwprintw(win->window,counter+1,2,"Enter number: ");
-    mvwprintw(win->window,LEVEL_WIN_ROWS-2,1,"press 'q' to quit");
+
+    mvwprintw(win->window,counter+1,L_MARGIN,"Enter number: ");
+    mvwprintw(win->window,LEVEL_WIN_ROWS-2,L_MARGIN,"press 'q' to quit");
     echo();
     wrefresh(win->window);
     flushinp();
     const char choice_char = (char)wgetch(win->window);
     noecho();
-    delwin(win->window);
+    del_window(win);
+
     if(choice_char == 'q'){
         clear();
         refresh();
-        free((void*)win);
-        return -1;
+        return EXIT_GAME;
     }
     int choice = choice_char - '0';
-    if(choice < 1 || choice > MAX_LEVELS){
-        choice = 1;
+    if(choice < MIN_LEVEL || choice > MAX_LEVELS){
+        choice = DEFAULT_LEVEL;
     }
     clear();
-    free((void*)win);
+    refresh();
     return choice;
 }
+
 void change_sprite_base_on_direction(GameObject_t* obj){
     if(obj->dx > 0){
         obj->current_sprite = obj->sprites_list.right;
@@ -165,6 +179,8 @@ void change_sprite_base_on_direction(GameObject_t* obj){
         obj->current_sprite = obj->sprites_list.up;
     }
 }
+
+
 void change_blink_sprite_base_on_direction(Player_t* p){
     if(p->obj.dx > 0){
         p->obj.current_sprite = p->blink_sprites.right;
@@ -176,45 +192,43 @@ void change_blink_sprite_base_on_direction(Player_t* p){
         p->obj.current_sprite = p->blink_sprites.up;
     }
 }
-int count_leaderboard_entries(void){
-    FILE* file = fopen("ranking.txt", "r");
-    if (file == NULL) {
-        return 0;
-    }
-    int count = 0;
-    char line[100];
-    while (fgets(line, sizeof(line), file)) {
-        count++;
-    }
-    fclose(file);
-    return count;
+
+//draw object to both window and map with specified map character, in order to keep them in sync in case someone forgets
+void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char){
+    draw_to_map_obj(obj, win, map_char);
+    draw_obj(obj, win);
 }
+//remove object from both window and map in order to keep them in sync in case someone forgets
+void remove_from_win_and_map(GameObject_t obj, Win* win){
+    remove_from_map_obj(obj, win);
+    remove_obj_from_window(obj, win);
+}
+
+//display leaderboard with entries and wait for some time
 void show_leaderboard(){
     clear();
     refresh();
-    Win* win = create_window(LEADERBOARD_WIN_ROWS, LEADERBOARD_WIN_COLS, LEADERBOARD_WIN_X, LEADERBOARD_WIN_Y, 0);
+    Win* win = create_window(LEADERBOARD_WIN_ROWS, LEADERBOARD_WIN_COLS, LEADERBOARD_WIN_X, LEADERBOARD_WIN_Y, false);
+    
     draw_border(win);
-    mvwprintw(win->window, 1, 2, "Leaderboard:");
+    mvwprintw(win->window, T_MARGIN, L_MARGIN, "Leaderboard:");
     int entry_count = count_leaderboard_entries();
-    if (entry_count == 0) {
-        mvwprintw(win->window, 2, 2, "No leaderboard data available.");
+    if (!entry_count) {
+        mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, "No leaderboard data available."); //if no entries show this message
     }
     else {
         LeaderboardEntry_t* entries = load_leaderboard_entries(entry_count);
         for (int i = 0; i < entry_count; i++) {
-            // 3 is the starting row and 2 is the starting column -2 from LEADERBOARD_WIN_ROWS for border
-            if (3+i >= LEADERBOARD_WIN_ROWS - 2) break;
-            mvwprintw(win->window, 3 + i, 2, "%d. %s - %d", i + 1, entries[i].name, entries[i].score);
+            // 3 is the starting row and -2 to leave space for border
+            if (T_MARGIN + 2 + i >= LEADERBOARD_WIN_ROWS - 2) break;
+            mvwprintw(win->window, T_MARGIN + 2 + i, L_MARGIN, "%d. %s - %d", i + 1, entries[i].name, entries[i].score);
             
-            if (3 + i >= LEADERBOARD_WIN_ROWS - 2) {
-                mvwprintw(win->window, LEADERBOARD_WIN_ROWS - 2, 2, "...");
+            if (T_MARGIN + 2 + i >= LEADERBOARD_WIN_ROWS - 2) {
+                mvwprintw(win->window, LEADERBOARD_WIN_ROWS - 2, L_MARGIN, "...");
                 break;
             }
         }
-        for(int j=0;j<entry_count;j++){
-            free((void*)entries[j].name);
-        }
-        free((void*)entries);
+        free_leaderboard_entries(entries, entry_count);
     }
     wnoutrefresh(win->window);
     doupdate();
@@ -222,12 +236,4 @@ void show_leaderboard(){
     clear();
     refresh();
     del_window(win);
-}
-void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char){
-    draw_to_map_obj(obj, win, map_char);
-    draw_obj(obj, win);
-}
-void remove_from_win_and_map(GameObject_t obj, Win* win){
-    remove_from_map_obj(obj, win);
-    remove_obj_from_window(obj, win);
 }

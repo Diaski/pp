@@ -8,15 +8,14 @@ void create_game_map(Win* win){
             win->map[y]=(char*)calloc((unsigned int)win->cols, sizeof(char));
             if (win->map[y]==NULL){
                 free_map(win->map,y);
-                exit(1);
+                exit(MALLOC_ERROR);
             }
         }
     }
     else{
-        exit(1);
+        exit(MALLOC_ERROR);
     }
 }
-
 
 void fill_border_to_map( Win* win){
     for (int y=0;y<win->rows;y++){
@@ -25,10 +24,11 @@ void fill_border_to_map( Win* win){
                 win->map[y][x]=BORDER;
                 continue;
             }
-            win->map[y][x]=' ';
+            win->map[y][x]=MAP_EMPTY;
         }
     }
 }
+
 void create_map(Win* win){
     create_game_map(win);
     fill_border_to_map(win);
@@ -37,10 +37,11 @@ void create_map(Win* win){
 void remove_from_map_obj(GameObject_t obj, Win* win){
     for(int row=0; row < obj.height; row++){
         for(int col=0; col < obj.width; col++){
-            win->map[obj.y + row][obj.x + col] = ' ';
+            win->map[obj.y + row][obj.x + col] = MAP_EMPTY;
         }
     }
 }
+
 void draw_to_map_obj(GameObject_t obj, Win* win,char symbol){
     for(int row=0; row < obj.height; row++){
         for(int col=0; col < obj.width; col++){
@@ -51,19 +52,21 @@ void draw_to_map_obj(GameObject_t obj, Win* win,char symbol){
         }
     }   
 }
+
 int detect_if_spot_hunter(Win* win, int x, int y,int width, int height){
     for(int row=-height;row<height;row++){
         for(int col=-width;col<width;col++){
             if(x+col<0 || y+row<0 || x+col>=win->cols || y+row>=win->rows){
-                return 1;
+                return true;
             }
             if(win->map[y+row][x+col]==ENEMY_SPRITE){
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
+
 void free_map(Map_t map, int size) {
     if (map == NULL) return;
 

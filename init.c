@@ -5,7 +5,7 @@ void init_ncurses(void) {
     initscr();
     start_color();
     noecho();
-    curs_set(0);
+    curs_set(false);
     keypad(stdscr, TRUE);
     init_pair(WHITE_ON_BLACK_PAIR, COLOR_WHITE, COLOR_BLACK);
     init_pair(RED_ON_BLACK_PAIR, COLOR_RED, COLOR_BLACK);

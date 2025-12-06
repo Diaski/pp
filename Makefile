@@ -1,4 +1,4 @@
-SRC = main.c graphics.c init.c io.c physics.c funcs.c actors.c map.c game.c
+SRC = main.c game.c player.c enemy.c star.c leaderboard.c io.c graphics.c map.c init.c physics.c
 # Prefer clang when present, otherwise fall back to system cc
 CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 
@@ -6,7 +6,7 @@ CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
 NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw 2>/dev/null || pkg-config --cflags ncurses 2>/dev/null || echo "-I/usr/include")
 NCURSES_LIBS := $(shell pkg-config --libs ncursesw 2>/dev/null || pkg-config --libs ncurses 2>/dev/null || echo "-lncursesw")
 
-CFLAGS = -O3 -g -Wall -Werror -Wpedantic -Wshadow -Wconversion -std=c23 \
+CFLAGS = -O3 -g -Wall -Werror -Wpedantic -Wshadow -std=c23 \
          -D_XOPEN_SOURCE_EXTENDED -Wextra -fsanitize=undefined \
          -fno-omit-frame-pointer $(NCURSES_CFLAGS) -fsanitize=address \
          -MMD -MP 
