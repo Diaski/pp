@@ -116,7 +116,7 @@ char* get_player_name_window(void){
     char* name=(char*)calloc(PLAYER_NAME_MAX,sizeof(char));
     Win* win = create_window(GET_PLAYER_NAME_WIN_ROWS, GET_PLAYER_NAME_WIN_COLS, 0, 0, false);
     mvwprintw(win->window, T_MARGIN, L_MARGIN, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
-    mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, "");
+    mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, " ");
     echo();
     wgetnstr(win->window, name, PLAYER_NAME_MAX -1);
     noecho();
