@@ -86,13 +86,13 @@ int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConf
 }
 //basic validation of input for settings and force exit condition
 int validate_input(char input, Player_t* player, int* game_speed, LevelConfig_t* config, int time_left){
-    if(input == 'q' || player->life_force <= 0 || time_left <= 0){
+    if(input == K_QUIT || player->life_force <= 0 || time_left <= 0){
         return EXIT_GAME;
     }
-    if(input == 'p' && *game_speed -config->delta_speed >= config->max_speed){
+    if(input == K_SPEED_UP && *game_speed -config->delta_speed >= config->max_speed){
         *game_speed -= config->delta_speed;
     }
-    if(input == 'o' && *game_speed +config->delta_speed <= config->min_speed){
+    if(input == K_SPEED_DOWN && *game_speed +config->delta_speed <= config->min_speed){
         *game_speed += config->delta_speed;
     }
     return 0;

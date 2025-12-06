@@ -14,7 +14,17 @@
 #define BLUE_ON_BLACK_PAIR 5
 #define CYAN_ON_BLACK_PAIR 6
 #define MAGENTA_ON_BLACK_PAIR 7
-
+/* ==========================================
+   KEYBINDS
+   ==========================================*/
+#define K_QUIT 'q'
+#define K_TAXI 'e'
+#define K_UP 'w'
+#define K_DOWN 's'
+#define K_LEFT 'a'
+#define K_RIGHT 'd'
+#define K_SPEED_UP 'p'
+#define K_SPEED_DOWN 'o'
 /* ==========================================
    SYSTEM, TIME & CONFIGURATION
    ========================================== */

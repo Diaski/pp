@@ -40,23 +40,23 @@ Player_t* create_player(LevelConfig_t* config){
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count){
     remove_obj_from_window(p->obj, win);
     switch(input){
-        case 'w':
+        case K_UP:
             p->obj.dx = 0;
             p->obj.dy = -p->obj.speed_y;
             break;
-        case 's':
+        case K_DOWN:
             p->obj.dx = 0;
             p->obj.dy = p->obj.speed_y;
             break;
-        case 'a':
+        case K_LEFT:
             p->obj.dx = -p->obj.speed_x;
             p->obj.dy = 0;
             break;
-        case 'd':
+        case K_RIGHT:
             p->obj.dx = p->obj.speed_x;
             p->obj.dy = 0;
             break;
-        case 'e':
+        case K_TAXI:
             if(p->taxi_cooldown <=0){
                 taxi(p,win,game_speed,hunters,hunters_count,stars,stars_count);
                 p->taxi_cooldown = p->base_taxi_cooldown;
