@@ -4,8 +4,8 @@
 #include <unistd.h>
 
 int calculate_score(LevelConfig_t* level_config,Player_t* player,int time_max, int time_left) {
-    int score_from_time = (int)(((long long)level_config->score_time_bias * time_max) / (time_max + time_left));
-    int score_from_stars = level_config->score_star_bias * player->stars;
+    const int score_from_time = (int)(((long long)level_config->score_time_bias * time_max) / (time_max + time_left));
+    const int score_from_stars = level_config->score_star_bias * player->stars;
     if(player->life_force <=0){
         return 0;
     }
@@ -65,7 +65,7 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,in
         default: break;
     }
     if(p->taxi_cooldown >0){
-        int cd =(((p->taxi_cooldown*game_speed)-game_speed)/game_speed);
+        const int cd =(((p->taxi_cooldown*game_speed)-game_speed)/game_speed);
         p->taxi_cooldown = cd;
     }
     if(p->life_force <= (cfg->player->life_force / PLAYER_CHANGE_COLOR_THRESHOLD)){
@@ -139,10 +139,10 @@ void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_co
     int count=0;
     Sprite_t old_sprite= (Sprite_t)calloc((unsigned int)(strlen(p->obj.current_sprite)+1),sizeof(char));
     strcpy(old_sprite, p->obj.current_sprite);
-    int old_width = p->obj.width;
-    int old_height = p->obj.height;
-    int prev_dy= p->obj.dy;
-    int prev_dx= p->obj.dx;
+    const int old_width = p->obj.width;
+    const int old_height = p->obj.height;
+    const int prev_dy= p->obj.dy;
+    const int prev_dx= p->obj.dx;
     do{
         x = rand() % (win->cols - p->obj.width -2) +p->obj.width+1;
         y = rand() % (win->rows - p->obj.height -2) +p->obj.height+1;

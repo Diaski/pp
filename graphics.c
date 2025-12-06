@@ -212,7 +212,7 @@ void show_leaderboard(){
     
     draw_border(win);
     mvwprintw(win->window, T_MARGIN, L_MARGIN, "Leaderboard:");
-    int entry_count = count_leaderboard_entries();
+    const int entry_count = count_leaderboard_entries();
     if (!entry_count) {
         mvwprintw(win->window, T_MARGIN + 1, L_MARGIN, "No leaderboard data available."); //if no entries show this message
     }

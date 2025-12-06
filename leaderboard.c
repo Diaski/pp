@@ -3,8 +3,8 @@
 #include <string.h>
 
 int compare_scores(const void* a, const void* b) {
-    LeaderboardEntry_t* entryA = (LeaderboardEntry_t*)a;
-    LeaderboardEntry_t* entryB = (LeaderboardEntry_t*)b;
+    const LeaderboardEntry_t* entryA = (LeaderboardEntry_t*)a;
+    const LeaderboardEntry_t* entryB = (LeaderboardEntry_t*)b;
     return entryB->score - entryA->score;
 }
 

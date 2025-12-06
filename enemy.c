@@ -36,14 +36,14 @@ void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int*
 }
 //damege increase over time
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul) {
-    long long top = (long long)damage * time_max * dmg_mul;
-    long long bottom = time_max + time_left;
+    const long long top = (long long)damage * time_max * dmg_mul;
+    const long long bottom = time_max + time_left;
     return (int)(top / bottom);
 }
 //bounces increase over time
 int calculate_bounces(int bounces, int time_max, int time_left) {
-    long long top = (long long)bounces * time_max * BOUNCES_MULT_OVER_TIME;
-    long long bottom = time_max + time_left;
+    const long long top = (long long)bounces * time_max * BOUNCES_MULT_OVER_TIME;
+    const long long bottom = time_max + time_left;
     
     return (int)(top / bottom);
 }
