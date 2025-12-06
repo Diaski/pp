@@ -37,7 +37,7 @@ int level_selector(char* p_name,int* replay,char** save){
         return res;
     }
     srand((unsigned int)cfg->seed);
-    int g_speed = cfg->max_speed;
+    const int g_speed = cfg->max_speed;
 
     create_hunter_and_star_list(cfg, &hunters, &stars);
 

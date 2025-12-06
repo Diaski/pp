@@ -34,18 +34,21 @@ void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int*
     }
 
 }
-//damege increase over time
+//linear damage increase over time
 int calculate_damage(int damage, int time_max, int time_left, int dmg_mul) {
-    const long long top = (long long)damage * time_max * dmg_mul;
-    const long long bottom = time_max + time_left;
-    return (int)(top / bottom);
+    if (time_max == 0) return damage;
+    const long long elapsed = (long long)(time_max - time_left);
+    const long long max_increase = (long long)damage * (dmg_mul - 1);
+    const long long current_increase = (max_increase * elapsed) / time_max;
+    return damage + (int)current_increase;
 }
-//bounces increase over time
+//linear bounce increase over time
 int calculate_bounces(int bounces, int time_max, int time_left) {
-    const long long top = (long long)bounces * time_max * BOUNCES_MULT_OVER_TIME;
-    const long long bottom = time_max + time_left;
-    
-    return (int)(top / bottom);
+    if (time_max == 0) return bounces;
+    const long long elapsed = (long long)(time_max - time_left);
+    const long long max_increase = (long long)bounces * (BOUNCES_MULT_OVER_TIME - 1);
+    const long long current_increase = (max_increase * elapsed) / time_max;
+    return bounces + (int)current_increase;
 }
 //setup enemy in random position next to window border giving same chance to all sides and set movement direction towards inside of the window
 void setup_enemy_in_window(Enemy_t* enemy,Win* win){

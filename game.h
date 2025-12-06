@@ -68,8 +68,6 @@
 #define DEFAULT_LEVEL 2
 #define MIN_LEVEL 1
 #define LIFE_FORCE_TO_SCORE_DIVIDER 10
-#define BOUNCES_MULT_OVER_TIME 3
-#define BOUNCES_CHANGE -1
 
 /* ==========================================
    UI: WINDOWS & MENUS
@@ -139,7 +137,9 @@
 /* ==========================================
    ENTITY: ENEMIES (HUNTERS)
    ==========================================*/
-#define ENEMY_SPRITE 'E' // Fallback or alternative enemy
+#define ENEMY_SPRITE 'E' 
+#define BOUNCES_MULT_OVER_TIME 5
+#define BOUNCES_CHANGE -1
 
 typedef char** Map_t;
 
