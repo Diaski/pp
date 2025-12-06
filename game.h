@@ -3,6 +3,10 @@
 
 #include <ncurses.h>
 
+/* ==========================================
+   COLORS
+   ========================================== */
+#define COLOR_PAIR_COUNT 7
 #define WHITE_ON_BLACK_PAIR 1
 #define RED_ON_BLACK_PAIR 2
 #define YELLOW_ON_BLACK_PAIR 3
@@ -10,75 +14,118 @@
 #define BLUE_ON_BLACK_PAIR 5
 #define CYAN_ON_BLACK_PAIR 6
 #define MAGENTA_ON_BLACK_PAIR 7
-#define COLOR_PAIR_COUNT 7
-#define HORIZONTAL 1
-#define VERTICAL 2
-#define BORDER 'B'
-#define PLAYER_SPRITE 'P'
-#define ENEMY_SPRITE 'E'
-#define STAR_SPRITE '*'
-#define PLAYER_NAME_MAX 50
-#define STAR '*'
-#define MAX_STARS 1000
-#define TAXI_BASE_SPEED 1000
-#define PLAYER_DIED 100
-#define WINNER 1
-#define BOUNCES_MULT_OVER_TIME 3
-#define STAR_FAIR_RANGE 1 // 1 means  x+1 y+1 and x-1 y-1 area so 1x1 becomes 3x3 area
-#define DASH_SPEED_MULTIPLIER 2
-#define STAR_FADE_CONVERSION_RATE 2 //means when it goes down by 1/n where n is this value its start to fade
+
+/* ==========================================
+   SYSTEM, TIME & CONFIGURATION
+   ========================================== */
+#define USC_T_MSC 1000 
 #define MAX_FILE_NAME_LENGTH 128
 #define MAX_LINE_LENGTH 256
 #define MAX_KEY_LENGTH 64
 #define MAX_ATTRIBUTE_LENGTH 64
 #define MAX_PREFIX_LENGTH 32
-#define PLAYER_BASE_SPAWN_X 6
-#define PLAYER_BASE_SPAWN_Y 6
-#define USC_T_MSC 1000 
+
+/* ==========================================
+   ERROR CODES & EXIT STATES
+   ========================================== */
+#define LOADING_CONFIG_ERROR 202
+#define TERMINAL_SIZE_ERROR 303
+#define MALLOC_ERROR 404
+#define EXIT_GAME 505
+#define FILE_ERROR 606
+
+/* ==========================================
+   GENERAL GAMEPLAY & PHYSICS
+   ========================================== */
+#define HORIZONTAL 1
+#define VERTICAL 2
+#define ALIVE 1
+#define DEAD 0
+#define WINNER 1
+#define MAP_EMPTY ' '
+#define BORDER 'B'
+#define L_MARGIN 1
+#define T_MARGIN 1
+
+/* ==========================================
+   LEVELS & SCORING
+   ========================================== */
+#define MAX_LEVELS 5
+#define DEFAULT_LEVEL 2
+#define MIN_LEVEL 1
+#define LIFE_FORCE_TO_SCORE_DIVIDER 10
+#define BOUNCES_MULT_OVER_TIME 3
+#define BOUNCES_CHANGE -1
+
+/* ==========================================
+   UI: WINDOWS & MENUS
+   ========================================== */
+#define MIN_WIN_ROWS 10
+#define MIN_WIN_COLS 20
+
+// Player Name Input Window
 #define GET_PLAYER_NAME_WIN_ROWS 5
 #define GET_PLAYER_NAME_WIN_COLS (PLAYER_NAME_MAX + 3)
-#define CONGRATULATIONS_SLEEP_TIME_USC 2000000
+
+// Congratulations/Win Window
 #define CONGRATULATIONS_WIN_ROWS 20
-#define CONGRATULATIONS_WIN_COLS (PLAYER_NAME_MAX + 2) //prefered to be PLAYER_NAME_MAX + 2 can be changed but display doesnt support it well
+#define CONGRATULATIONS_WIN_COLS (PLAYER_NAME_MAX + 2) 
 #define CONGRATULATIONS_WIN_X 5
 #define CONGRATULATIONS_WIN_Y 5
+#define CONGRATULATIONS_SLEEP_TIME_USC 2000000
+
+// Level Display Window
 #define LEVEL_WIN_ROWS 20
 #define LEVEL_WIN_COLS 50
 #define LEVEL_WIN_X 5
 #define LEVEL_WIN_Y 5
-#define MAX_LEVELS 5
-#define DEFAULT_LEVEL 2
-#define MIN_LEVEL 1
-#define LOADING_CONFIG_ERROR 2
-#define TERMINAL_SIZE_ERROR 3
-#define FILE_ERROR 606
-#define MALLOC_ERROR 4
-#define EXIT_GAME 505
+
+// Leaderboard Window
 #define LEADERBOARD_WIN_ROWS 20
 #define LEADERBOARD_WIN_COLS 50
 #define LEADERBOARD_WIN_X 5
 #define LEADERBOARD_WIN_Y 5
 #define LEADERBOARD_MAX_PLAYERS 10
 #define LEADERBOARD_SLEEP_TIME_USC 5000000
-#define LIFE_FORCE_TO_SCORE_DIVIDER 10
+
+/* ==========================================
+   ENTITY: PLAYER
+   ========================================== */
+#define PLAYER_SPRITE 'P'
+#define DEFAULT_PLAYER_NAME "Player1"
+#define PLAYER_NAME_MAX 50
+#define PLAYER_BASE_SPAWN_X 6
+#define PLAYER_BASE_SPAWN_Y 6
+#define PLAYER_DIED 100
+#define DASH_SPEED_MULTIPLIER 2
+#define PLAYER_CHANGE_COLOR_THRESHOLD 2 // when life force is less than half change color
+
+/* ==========================================
+   ENTITY: TAXI (PLAYER ABILITY)
+   ========================================== */
+#define TAXI_SPRITE ".[T]."
 #define TAXI_WIDTH 5
 #define TAXI_HEIGHT 1
 #define TAXI_SPEED 1
-#define TAXI_SPRITE ".[T]."
-#define L_MARGIN 1
-#define T_MARGIN 1
-#define MIN_WIN_ROWS 10
-#define MIN_WIN_COLS 20
-#define ALIVE 1
-#define DEAD 0
-#define DEFAULT_PLAYER_NAME "Player1"
-#define BOUNCES_CHANGE -1
-#define MAP_EMPTY ' '
-#define PLAYER_CHANGE_COLOR_THRESHOLD 2 //when life force is less than half change color
+#define TAXI_BASE_SPEED 1000
 #define TAXI_SAFE_RANGE 1
 #define MAX_TAXI_SPAWN_ATTEMPTS 100
-#define SPAWN_STAR_Y 1
+
+/* ==========================================
+   ENTITY: STARS (COLLECTIBLES)
+   ========================================== */
+#define STAR '*'
+#define STAR_SPRITE '*'
+#define MAX_STARS 1000
 #define STAR_SCORE 1
+#define SPAWN_STAR_Y 1
+#define STAR_FAIR_RANGE 1   // 1 means x+1 y+1 and x-1 y-1 area (from 1x1 to 3x3 area)
+#define STAR_FADE_CONVERSION_RATE 2 // starts to fade when it goes down by 1/n
+
+/* ==========================================
+   ENTITY: ENEMIES (HUNTERS)
+   ==========================================*/
+#define ENEMY_SPRITE 'E' // Fallback or alternative enemy
 
 typedef char** Map_t;
 
