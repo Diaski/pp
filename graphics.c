@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 
 Win* create_window(int rows,int cols,int x, int y,int have_map) {
@@ -78,20 +79,23 @@ void draw_obj(const GameObject_t obj, Win* win){
     }
     deselect_color(obj,win);
 }
+
 void draw_sign_congratulations(char* player_name, int level_num,Win* win){
-    mvwprintw(win->window, 2, 2, "Congratulations, %s!", player_name);
+    wattron(win->window, COLOR_PAIR(RED_ON_BLACK_PAIR));
+    mvwprintw(win->window, 2,  (CONGRATULATIONS_WIN_COLS - 25) / 2, "Congratulations! GOOD JOB"); //its 25 because "Congratulations!" has 25 chars and i want to avoid unnecessary calculations
+    mvwprintw(win->window, 3,  (CONGRATULATIONS_WIN_COLS - (int)strlen(player_name)) / 2, "%s", player_name);
     wnoutrefresh(win->window);
     doupdate();
     usleep(CONGRATULATIONS_SLEEP_TIME_USC);
-    mvwprintw(win->window, 4, 2, "You have completed Level %d!", level_num);
+    mvwprintw(win->window, 4,  (CONGRATULATIONS_WIN_COLS - 27 - (int)log10(level_num)) / 2, "You have completed Level %d!", level_num); //its 27 because same case as above
     wnoutrefresh(win->window);
     doupdate();
+    wattroff(win->window, COLOR_PAIR(RED_ON_BLACK_PAIR));
 }
 void congratulate_player_win(char* player_name, int level_num){
     clear();
     refresh();
     Win* win=create_window(CONGRATULATIONS_WIN_ROWS,CONGRATULATIONS_WIN_COLS,CONGRATULATIONS_WIN_X,CONGRATULATIONS_WIN_Y,0);
-    draw_border(win);
     draw_sign_congratulations(player_name, level_num, win);
     usleep(CONGRATULATIONS_SLEEP_TIME_USC);
     clear();
@@ -100,8 +104,9 @@ void congratulate_player_win(char* player_name, int level_num){
 }
 char* player_name_window(void){
     char* name=(char*)calloc(PLAYER_NAME_MAX,sizeof(char));
-    Win* win = create_window(5, 40, 1, 1, 0);
+    Win* win = create_window(5, PLAYER_NAME_MAX+2, 1, 1, 0);
     mvwprintw(win->window, 1, 2, "Enter your name (max %d chars): ", PLAYER_NAME_MAX -1);
+    mvwprintw(win->window, 2, 2, "");
     echo();
     wgetnstr(win->window, name, PLAYER_NAME_MAX -1);
     noecho();
@@ -158,6 +163,17 @@ void change_sprite_base_on_direction(GameObject_t* obj){
         obj->current_sprite = obj->sprites_list.down;
     } else if(obj->dy < 0){
         obj->current_sprite = obj->sprites_list.up;
+    }
+}
+void change_blink_sprite_base_on_direction(Player_t* p){
+    if(p->obj.dx > 0){
+        p->obj.current_sprite = p->blink_sprites.right;
+    } else if(p->obj.dx < 0){
+        p->obj.current_sprite = p->blink_sprites.left;
+    } else if(p->obj.dy > 0){
+        p->obj.current_sprite = p->blink_sprites.down;
+    } else if(p->obj.dy < 0){
+        p->obj.current_sprite = p->blink_sprites.up;
     }
 }
 int count_leaderboard_entries(void){

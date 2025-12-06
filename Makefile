@@ -9,7 +9,7 @@ NCURSES_LIBS := $(shell pkg-config --libs ncursesw 2>/dev/null || pkg-config --l
 CFLAGS = -O3 -g -Wall -Werror -Wpedantic -Wshadow -Wconversion -std=c23 \
          -D_XOPEN_SOURCE_EXTENDED -Wextra -fsanitize=undefined \
          -fno-omit-frame-pointer $(NCURSES_CFLAGS) -fsanitize=address \
-         -MMD -MP
+         -MMD -MP 
 
 LDLIBS = $(NCURSES_LIBS)
 

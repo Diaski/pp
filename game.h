@@ -17,7 +17,7 @@
 #define PLAYER_SPRITE 'P'
 #define ENEMY_SPRITE 'E'
 #define STAR_SPRITE '*'
-#define PLAYER_NAME_MAX 100
+#define PLAYER_NAME_MAX 50
 #define STAR '*'
 #define MAX_STARS 1000
 #define TAXI_BASE_SPEED 1000
@@ -35,9 +35,9 @@
 #define PLAYER_BASE_SPAWN_X 6
 #define PLAYER_BASE_SPAWN_Y 6
 #define USC_T_MSC 1000 
-#define CONGRATULATIONS_SLEEP_TIME_USC 1000000
+#define CONGRATULATIONS_SLEEP_TIME_USC 2000000
 #define CONGRATULATIONS_WIN_ROWS 20
-#define CONGRATULATIONS_WIN_COLS 50
+#define CONGRATULATIONS_WIN_COLS (PLAYER_NAME_MAX + 2) //prefered to be PLAYER_NAME_MAX + 2 can be changed but display doesnt support it well
 #define CONGRATULATIONS_WIN_X 5
 #define CONGRATULATIONS_WIN_Y 5
 #define LEVEL_WIN_ROWS 20
@@ -99,7 +99,8 @@ typedef struct {
 
 typedef struct{
     GameObject_t obj;
-    int life_force,stars,wanted_x,wanted_y,taxi_cooldown,base_taxi_cooldown;
+    SpriteList_t blink_sprites;
+    int life_force,stars,taxi_cooldown,base_taxi_cooldown,blink_tick,blink_tick_ratio;
     char name[PLAYER_NAME_MAX];
 }Player_t;
 
@@ -110,7 +111,25 @@ typedef struct {
 } Win;
 
 typedef struct {
-    int max_speed,delta_speed,min_speed,map_rows, map_cols,status_rows, status_cols, time_limit_ms, star_quota,base_score, player_health, hunter_spawn_rate, hunter_type_count,seed,damage_over_time_mult,score_time_bias,score_star_bias,max_enemys_per_level,star_spawn_chance;
+    int max_speed;
+    int delta_speed;
+    int min_speed;
+    int map_rows;
+    int map_cols;
+    int status_rows;
+    int status_cols;
+    int time_limit_ms;
+    int star_quota;
+    int base_score;
+    int player_health;
+    int hunter_spawn_rate;
+    int hunter_type_count;
+    int seed;
+    int damage_over_time_mult;
+    int score_time_bias;
+    int score_star_bias;
+    int max_enemys_per_level;
+    int star_spawn_chance;
     Player_t* player;
     Enemy_t* hunters;
 } LevelConfig_t;
@@ -132,6 +151,7 @@ void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char);
 void remove_from_win_and_map(GameObject_t obj, Win* win);
 void del_window(Win* win);
 void show_leaderboard(void);
+void change_blink_sprite_base_on_direction(Player_t* p);
 
 //physics.c
 int detect_wall_collision(GameObject_t obj, Win* win);
@@ -159,6 +179,7 @@ void move_star(Star_t* star, Win* win,Player_t* player,int only_draw);
 Star_t* spawn_star(Win* win);
 void free_star_list(Star_t** stars, int count);
 void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
+int reverse_when_touch_border(GameObject_t* obj, Win* win);
 
 //map.c
 void create_map(Win* win);
@@ -171,7 +192,7 @@ int detect_if_spot_hunter(Win* win, int x, int y,int width, int height);
 LevelConfig_t* load_level_config(int level_num) ;
 void free_level_config(LevelConfig_t* config);
 void load_hunters(char* key, int value,char* string_val, LevelConfig_t* config, int count);
-void load_sprites(char* attribute, char* value,SpriteList_t* sprite_list);
+void load_sprites(char* attr, char* value,SpriteList_t* sprite_list);
 char* maloc_sprite(LevelConfig_t* config, int i);
 void assign_values(LevelConfig_t* config, char* key,char* line) ;
 void load_player(char* key,int value, char* string_val, LevelConfig_t* config);
@@ -184,5 +205,4 @@ int level_selector(char* player_name);
 void move_star_list(Star_t** stars, int count, Win* win, Player_t* player,int only_draw);
 void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player,int only_draw);
 int game_loop(Win* main_win, Win* status_win, Player_t* player, int game_speed, LevelConfig_t* config, Enemy_t** hunters, int* hunters_count, int level_num, Star_t** stars, int* stars_count);
-
 #endif

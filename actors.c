@@ -3,18 +3,31 @@
 #include <string.h>
 #include <unistd.h>
 
-int move_player(Player_t* p, Win* win,int dont_change_sprite){
-    if(detect_wall_collision(p->obj, win)!=0){
-        return 0;
-    }
-    remove_from_map_obj(p->obj, win);
-    p->obj.x += p->obj.dx;
-    p->obj.y += p->obj.dy;
-    if(dont_change_sprite){
-        return 1;
-    }
-    change_sprite_base_on_direction(&p->obj);
-    return 1;
+
+Player_t* create_player(LevelConfig_t* config){
+    Player_t* p = (Player_t*)calloc(1,sizeof(Player_t));
+    p->obj.width=config->player->obj.width;
+    p->obj.height=config->player->obj.height;
+    p->obj.x = PLAYER_BASE_SPAWN_X;
+    p->obj.y = PLAYER_BASE_SPAWN_Y;
+    p->obj.speed_x = config->player->obj.speed_x;
+    p->obj.speed_y = config->player->obj.speed_y;
+    p->obj.dx = 0;
+    p->obj.dy = p->obj.speed_y;
+    p->obj.sprites_list = config->player->obj.sprites_list;
+    p->obj.current_sprite = p->obj.sprites_list.down;
+    p->life_force = config->player->life_force;
+    p->obj.color=config->player->obj.color;
+    p->stars = 0;
+    p->taxi_cooldown = 0;
+    p->base_taxi_cooldown = config->player->base_taxi_cooldown;
+    p->blink_sprites.left = config->player->blink_sprites.left;
+    p->blink_sprites.right = config->player->blink_sprites.right;
+    p->blink_sprites.up = config->player->blink_sprites.up;
+    p->blink_sprites.down = config->player->blink_sprites.down;
+    p->blink_tick = 0;
+    p->blink_tick_ratio = config->player->blink_tick_ratio;
+    return p;
 }
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count){
     remove_obj_from_window(p->obj, win);
@@ -53,25 +66,25 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,in
     move_player(p, win,0);
     draw_to_win_and_map(p->obj, win, PLAYER_SPRITE);
 }
-Player_t* create_player(LevelConfig_t* config){
-    Player_t* p = (Player_t*)calloc(1,sizeof(Player_t));
-    p->obj.width=config->player->obj.width;
-    p->obj.height=config->player->obj.height;
-    p->obj.x = PLAYER_BASE_SPAWN_X;
-    p->obj.y = PLAYER_BASE_SPAWN_Y;
-    p->obj.speed_x = config->player->obj.speed_x;
-    p->obj.speed_y = config->player->obj.speed_y;
-    p->obj.dx = 0;
-    p->obj.dy = p->obj.speed_y;
-    p->obj.sprites_list = config->player->obj.sprites_list;
-    p->obj.current_sprite = p->obj.sprites_list.down;
-    p->life_force = config->player->life_force;
-    p->obj.color=config->player->obj.color;
-    p->stars = 0;
-    p->taxi_cooldown = 0;
-    p->base_taxi_cooldown = config->player->base_taxi_cooldown;
-    return p;
+int move_player(Player_t* p, Win* win,int dont_change_sprite){
+    remove_from_map_obj(p->obj, win);
+    reverse_when_touch_border(&p->obj, win);
+    p->obj.x += p->obj.dx;
+    p->obj.y += p->obj.dy;
+    if(dont_change_sprite){
+        return 1;
+    }
+    if(p->blink_tick < p->blink_tick_ratio){
+        change_sprite_base_on_direction(&p->obj);
+        p->blink_tick += 1;
+    } else {
+        change_blink_sprite_base_on_direction(p);
+        p->blink_tick = 0;
+    }
+    return 1;
 }
+
+
 void destroy_player(Player_t* p){
     free(p);
 }
@@ -128,30 +141,32 @@ Enemy_t* spawn_enemy(Win* win, LevelConfig_t* config,int type,int time_left){
     draw_to_map_obj(enemy->obj, win, ENEMY_SPRITE);
     return enemy;
 }
-
+int reverse_when_touch_border(GameObject_t* obj, Win* win){
+    int jumped=0;
+    int collision = detect_wall_collision(*obj, win);
+    if(collision == HORIZONTAL){
+        obj->dx = -obj->dx;
+        jumped=1;
+    }
+    collision = detect_wall_collision(*obj, win);
+    if(collision == VERTICAL){
+        obj->dy = -obj->dy;
+        jumped=1;
+    }
+    return jumped;
+}
 void enemy_movement(Enemy_t* enemy,Player_t* player,Win* win){
     if(check_if_missed_player(&player->obj, &enemy->obj) || enemy->dashing){
         if (enemy->dash_limit >0){
             enemy->dashing = dash(enemy,player);
         }
     }
-    int collision = detect_wall_collision(enemy->obj, win);
-    if(collision == HORIZONTAL){
-        enemy->obj.dx = -enemy->obj.dx;
+    if(reverse_when_touch_border(&enemy->obj, win)){
         if(enemy->bounces >0){
-            enemy->bounces--;
-        } else {
-            enemy->alive =0;
-            return;
+            enemy->bounces -= 1;
         }
-    }
-    collision = detect_wall_collision(enemy->obj, win);
-    if(collision == VERTICAL){
-        enemy->obj.dy = -enemy->obj.dy;
-        if(enemy->bounces >0){
-            enemy->bounces--;
-        } else {
-            enemy->alive =0;
+        else {
+            enemy->alive = 0;
             return;
         }
     }
