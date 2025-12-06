@@ -61,4 +61,5 @@ void free_leaderboard_entries(LeaderboardEntry_t* entries, int entry_count){
         free((void*)entries[i].name);
     }
     free((void*)entries);
+    return;
 }
