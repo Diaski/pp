@@ -131,40 +131,51 @@ char* get_player_name_window(void){
 }
 //display level selection menu and get user choice
 //if pressed q return EXIT_GAME
-int display_level_selection_menu(void){
-    clear();
-    refresh();
-    int counter =T_MARGIN;
-    Win* win=create_window(LEVEL_WIN_ROWS,LEVEL_WIN_COLS,LEVEL_WIN_X,LEVEL_WIN_Y,0);
-
+void draw_level_ui(Win* win, int replay) {
     draw_border(win);
-    mvwprintw(win->window,T_MARGIN,L_MARGIN,"Select Level:");
-    for (int i=MIN_LEVEL-1;i<MAX_LEVELS;i++){
-        if(i>=LEVEL_WIN_ROWS-4) break;
-        mvwprintw(win->window,T_MARGIN+1+i,L_MARGIN,"%c. Level %c",'1'+i, '1'+i);
-        counter++;
+    mvwprintw(win->window, T_MARGIN, L_MARGIN, "Select Level:");
+    
+    // Draw Level List
+    for (int i = MIN_LEVEL; i <= MAX_LEVELS && i < LEVEL_WIN_ROWS - 5; i++) {
+        mvwprintw(win->window, T_MARGIN + i, L_MARGIN, "%d. Level %d", i, i);
     }
 
-    mvwprintw(win->window,counter+1,L_MARGIN,"Enter number: ");
-    mvwprintw(win->window,LEVEL_WIN_ROWS-2,L_MARGIN,"press 'q' to quit");
+    mvwprintw(win->window, T_MARGIN + MAX_LEVELS + 1, L_MARGIN, "Enter number: ");
+    if (replay == REPLAY_ENABLED || replay == REPLAY_LOADED) {
+        mvwprintw(win->window, LEVEL_WIN_ROWS - 3, L_MARGIN, "Click '%c' to replay", K_REPLAY);
+    }
+    mvwprintw(win->window, LEVEL_WIN_ROWS - 2, L_MARGIN, "Press '%c' to quit", K_QUIT);
+}
+int display_level_selection_menu(int* replay){
+    clear();
+    refresh();
+    Win* win=create_window(LEVEL_WIN_ROWS,LEVEL_WIN_COLS,LEVEL_WIN_X,LEVEL_WIN_Y,false);
+
+    draw_level_ui(win, *replay);
+
     echo();
     wrefresh(win->window);
     flushinp();
     const char choice_char = (char)wgetch(win->window);
     noecho();
     del_window(win);
-
-    if(choice_char == 'q'){
-        clear();
-        refresh();
+    clear();
+    refresh();
+    if(choice_char == K_QUIT){
         return EXIT_GAME;
+    }
+    //check for replay
+    if(choice_char == K_REPLAY &&  (*replay == REPLAY_LOADED || *replay == REPLAY_ENABLED)){
+        *replay = REPLAY_ENABLED;
+        return REPLAY_GAME;
+    }
+    else{
+        *replay = REPLAY_DISABLED;
     }
     int choice = choice_char - '0';
     if(choice < MIN_LEVEL || choice > MAX_LEVELS){
         choice = DEFAULT_LEVEL;
     }
-    clear();
-    refresh();
     return choice;
 }
 

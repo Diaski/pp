@@ -166,6 +166,17 @@ void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_co
     free(old_sprite);
 }
 
+void create_save(char** save,LevelConfig_t* cfg){
+    if (*save != NULL) {
+        free(*save);
+    }
+    *save = (char*)calloc((unsigned int)(cfg->max_speed*cfg->time_limit_ms+2), sizeof(char));  // 2 one for null second for level number
+    if (*save==NULL){
+        exit(MALLOC_ERROR);
+    }
+    return;
+}
+
 void destroy_player(Player_t* p){
     free(p);
 }

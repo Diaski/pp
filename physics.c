@@ -70,9 +70,13 @@ int check_if_hit_player(GameObject_t obj,Win* win){
 int check_if_star_hit_player(GameObject_t obj,Win* win){
     for(int row = 0; row < obj.height+(STAR_FAIR_RANGE*2); row++){
         for(int col = 0; col < obj.width+(STAR_FAIR_RANGE*2); col++){
-            if(win->rows <= obj.y + row -STAR_FAIR_RANGE || win->cols <= obj.x + col -STAR_FAIR_RANGE){
-                return false;
+            int check_row = row - STAR_FAIR_RANGE;
+            int check_col = col - STAR_FAIR_RANGE;
+            
+            if (check_row < 0 || check_row >= win->rows || check_col < 0 || check_col >= win->cols) {
+                continue;
             }
+            
             if(win->map[obj.y + row -STAR_FAIR_RANGE][obj.x + col-STAR_FAIR_RANGE] == PLAYER_SPRITE){
                 return true;
             }

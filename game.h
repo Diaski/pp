@@ -25,6 +25,7 @@
 #define K_RIGHT 'd'
 #define K_SPEED_UP 'p'
 #define K_SPEED_DOWN 'o'
+#define K_REPLAY 'r'
 /* ==========================================
    SYSTEM, TIME & CONFIGURATION
    ========================================== */
@@ -43,6 +44,7 @@
 #define MALLOC_ERROR 404
 #define EXIT_GAME 505
 #define FILE_ERROR 606
+#define REPLAY_GAME 707
 
 /* ==========================================
    GENERAL GAMEPLAY & PHYSICS
@@ -56,7 +58,9 @@
 #define BORDER 'B'
 #define L_MARGIN 1
 #define T_MARGIN 1
-
+#define REPLAY_DISABLED 0
+#define REPLAY_LOADED 1
+#define REPLAY_ENABLED 2
 /* ==========================================
    LEVELS & SCORING
    ========================================== */
@@ -217,7 +221,7 @@ Win* create_window(int rows,int cols,int x, int y,int have_map);
 void draw_border(Win* win);
 void update_status_display(Win* win, char* name,int level,int time_left,int stars,int stars_quota,int hp);
 void draw_obj(const GameObject_t obj, Win* win);
-int display_level_selection_menu(void);
+int display_level_selection_menu(int* replay);
 char* get_player_name_window(void);
 void congratulate_player_win(char* player_name, int level_num,int res);
 void change_sprite_base_on_direction(GameObject_t* obj);
@@ -264,10 +268,12 @@ void show_leaderboard(void);
 //game.c
 int validate_input(char input, Player_t* player, int* game_speed, LevelConfig_t* config, int time_left);
 void end_of_tick(int game_speed,int* time_left);
-void free_all_from_level(LevelConfig_t* config, Enemy_t** hunters, int hunters_count, Star_t** stars, int stars_count, Win* main_win, Win* status_win, Player_t* player);
-void end_level(char* player_name, int level_num, int res, int score);
-int level_selector(char* p_name);
-int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConfig_t* cfg,Enemy_t** hunters,int* hunters_count,int level_num, Star_t** stars,int* stars_count,int* time_left);
+void free_all_from_level(LevelConfig_t* config, Enemy_t** hunters, int hunters_count, Star_t** stars, int stars_count,
+   Win* main_win, Win* status_win, Player_t* player);
+void end_level(char* player_name, int level_num, int res, int score,int* replay);
+int level_selector(char* p_name,int* replay,char** save);
+int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConfig_t* cfg,
+   Enemy_t** hunters,int* hunters_c,int lvl_num, Star_t** stars,int* stars_c,int* time_left,char** save, int* replay);
 
 //star.c
 void random_star_spawn(Win* win, LevelConfig_t* config, Star_t** stars, int* stars_count);
@@ -292,8 +298,11 @@ void destroy_enemy_list(Enemy_t** enemy, int count);
 Player_t* create_player(LevelConfig_t* config);
 int move_player(Player_t* p, Win* win,int only_draw);
 void setup_player_sprites(Player_t* p, LevelConfig_t* config);
-void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
-void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);void destroy_player(Player_t* p);
+void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed,
+    Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count);
+void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,
+   int stars_count);void destroy_player(Player_t* p);
 int calculate_score(LevelConfig_t* level_config,Player_t* player,int time_max, int time_left);
+void create_save(char** save,LevelConfig_t* cfg);
 
 #endif

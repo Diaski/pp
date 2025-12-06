@@ -19,7 +19,7 @@ LeaderboardEntry_t* load_leaderboard_entries(int entry_count) {
             }
         }
         int i = 0;
-        while (i < entry_count && fscanf(file, "%d %s", &entries[i].score, temp_name) == 2) {
+        while (i < entry_count && fscanf(file, "%d %[^\n]", &entries[i].score, temp_name) == 2) {
             strcpy(entries[i].name, temp_name); // Standard string copy
             i++;
         }
@@ -32,6 +32,10 @@ int save_to_leaderboard(char* player_name, int score){
     FILE* file = fopen("ranking.txt", "a");
     if (file == NULL) {
         return MALLOC_ERROR;
+    }
+    if(score <=0){
+        fclose(file);
+        return 0;
     }
     fprintf(file, "%d %s\n", score, player_name);
     fclose(file);

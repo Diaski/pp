@@ -5,14 +5,30 @@
 #include <unistd.h>
 
 //setup level, run game loop, and cleanup after level
-int level_selector(char* p_name){
+void create_hunter_and_star_list(LevelConfig_t* cfg, Enemy_t*** hunters,Star_t*** stars){
+    *hunters = (Enemy_t**)calloc((unsigned int)cfg->max_enemys,sizeof(Enemy_t*));
+    *stars = (Star_t**)calloc((unsigned int)cfg->max_enemys,sizeof(Star_t*));
+}
+void create_main_and_status_window(LevelConfig_t* cfg, Win** main_win, Win** status_win){
+    *main_win=create_window(cfg->map_rows,cfg->map_cols,0,0,true);
+    *status_win=create_window(cfg->status_rows,cfg->status_cols,0,cfg->map_rows,false);
+}
+int level_selector(char* p_name,int* replay,char** save){
     int stars_count=0;
     int hunters_count=0;
     int time_left=0;
-    int g_speed;
-    const int lvl = display_level_selection_menu();
+    Enemy_t** hunters;
+    Star_t** stars;
+    Win* main_win;
+    Win* status_win;
+
+    int lvl = display_level_selection_menu(replay);
     if (lvl == EXIT_GAME){
         return EXIT_GAME;
+    }
+
+    if(lvl == REPLAY_GAME){
+        lvl= (*save)[0] - '0';
     }
 
     LevelConfig_t* cfg = load_level_config(lvl);
@@ -20,38 +36,70 @@ int level_selector(char* p_name){
     if (res != 0){
         return res;
     }
-    g_speed = cfg->max_speed;
-    Enemy_t** hunters=(Enemy_t**)calloc((unsigned int)cfg->max_enemys,sizeof(Enemy_t*));
-    Star_t** stars=(Star_t**)calloc((unsigned int)cfg->max_enemys,sizeof(Star_t*));
+    srand((unsigned int)cfg->seed);
+    int g_speed = cfg->max_speed;
 
-    Win* main_win=create_window(cfg->map_rows,cfg->map_cols,0,0,1);
-    Win* status_win=create_window(cfg->status_rows,cfg->status_cols,0,cfg->map_rows,0);
+    create_hunter_and_star_list(cfg, &hunters, &stars);
+
+    create_main_and_status_window(cfg, &main_win, &status_win);
+
     Player_t* p=create_player(cfg);
     strncpy(p->name, p_name, PLAYER_NAME_MAX - 1);
-    // -1 to leave space for null terminator
     refresh();
 
     wnoutrefresh(main_win->window);
     wnoutrefresh(status_win->window);
     doupdate();
-
-    if(!res) res = game_loop(main_win,status_win,p, g_speed,cfg,hunters,&hunters_count, lvl, stars, &stars_count, &time_left);
     
-    end_level(p_name, lvl, res, calculate_score(cfg, p, cfg->time_limit_ms, time_left));
+    if(!res) res = game_loop(main_win,status_win,p, g_speed,cfg,hunters,&hunters_count, lvl, stars, &stars_count, &time_left, save, replay);
+    
+    end_level(p_name, lvl, res, calculate_score(cfg, p, cfg->time_limit_ms, time_left), replay);
     free_all_from_level(cfg, hunters, hunters_count, stars, stars_count, main_win, status_win, p);
     return res;
 }
+void entities_update(Win* main_win, LevelConfig_t* cfg, Player_t* p, Enemy_t** hunters, int* hunters_count, Star_t** stars, int* stars_count,const int* time_left){
+    random_star_spawn(main_win, cfg, stars, stars_count);
+    move_star_list(stars, *stars_count, main_win, p, false);
 
-int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConfig_t* cfg,Enemy_t** hunters,int* hunters_count,int level_num, Star_t** stars,int* stars_count,int* time_left){
-    char input,last_input;
-    if (hunters == NULL) {
-        return(MALLOC_ERROR);
+    random_enemy_spawn(main_win, cfg, hunters, hunters_count, *time_left);
+    move_enemy_list(&hunters, *hunters_count, main_win, p,false);
+}
+
+char get_game_input(int replay_mode, char** save, long tick_count) {
+    char last_input;
+    if (replay_mode == REPLAY_ENABLED) {
+        last_input = (*save)[tick_count];
+    } else {
+        last_input = (char)getch();
+        (*save)[tick_count] = last_input;
     }
+    return last_input;
+}
+
+void render_game(Win* main, Win* status, Player_t* p, int lvl, int time, int quota) {
+    update_status_display(status, p->name, lvl, time, p->stars, quota, p->life_force);
+    wnoutrefresh(main->window);
+    wnoutrefresh(status->window);
+    doupdate();
+}
+
+void init_replay_system(int* replay, char** save, LevelConfig_t* cfg, int lvl_num) {
+    if (*replay == REPLAY_DISABLED) {
+        create_save(save, cfg);
+        (*save)[0] = (char)(lvl_num + '0');
+        *replay = REPLAY_LOADED;
+    }
+}
+
+int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConfig_t* cfg,Enemy_t** hunters,int* hunters_c,int lvl_num, Star_t** stars,int* stars_c,int* time_left,char** save, int* replay){
+    char input,last_input;
+    long int count=1;
+    init_replay_system(replay, save, cfg, lvl_num);
     nodelay(stdscr, TRUE);
     *time_left = cfg->time_limit_ms;
     while (true)
     {   
-        last_input = (char)getch();
+        last_input = get_game_input(*replay, save, count);
         if(last_input != ERR){       
             input = last_input;
         }
@@ -59,22 +107,14 @@ int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConf
         if(validate_input(input, p, &g_speed, cfg, *time_left)){
             return PLAYER_DIED;
         }
-        //validate input(only for game settings like exiting and speed change) and flushinput buffer to avoid input lag
 
-        handle_player_input(p, input,main_win,cfg, g_speed,hunters,*hunters_count, stars,*stars_count);
+        handle_player_input(p, input,main_win,cfg, g_speed,hunters,*hunters_c, stars,*stars_c);
 
-        random_star_spawn(main_win, cfg, stars, stars_count);
-        move_star_list(stars, *stars_count, main_win, p, false);
+        entities_update(main_win, cfg, p, hunters, hunters_c, stars, stars_c, time_left);
 
-        random_enemy_spawn(main_win, cfg, hunters, hunters_count, *time_left);
-        move_enemy_list(&hunters, *hunters_count, main_win, p,false);
-
-        update_status_display(status_win, p->name,level_num,*time_left,p->stars,cfg->star_quota,p->life_force);
-        wnoutrefresh(main_win->window);
-        wnoutrefresh(status_win->window);
-        doupdate();
-
+        render_game(main_win, status_win, p, lvl_num, *time_left, cfg->star_quota);
         input=0;
+        count++;
         end_of_tick(g_speed, time_left);
         if(p->stars >= cfg->star_quota){
             break;
@@ -113,7 +153,12 @@ void free_all_from_level(LevelConfig_t* config, Enemy_t** hunters, int hunters_c
     free_level_config(config);
 }
 
-void end_level(char* player_name, int level_num, int res, int score){
+void end_level(char* player_name, int level_num, int res, int score,int* replay){
+    if(*replay == REPLAY_ENABLED){
+        *replay = REPLAY_LOADED;
+        show_leaderboard(); //skip end level if in replay mode
+        return;
+    }
     if(!res || res == EXIT_GAME|| res == PLAYER_DIED){
         congratulate_player_win(player_name, level_num,res);
     }
