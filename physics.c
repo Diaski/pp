@@ -42,19 +42,14 @@ void dash_calculate(Enemy_t* enemy,Player_t* player){
         enemy->obj.dy =0;
     }
     enemy->dashing =0;
-    enemy->sleep_after_dash =3;
+    enemy->sleep_after_dash =enemy->base_dash_sleep_time;
     enemy->dash_limit--;
 }
-int dash(Enemy_t* enemy,Player_t* player,Win* win){
+int dash(Enemy_t* enemy,Player_t* player){
     if(enemy->sleep_after_dash >0){
         enemy->obj.dx = 0;
         enemy->obj.dy = 0;
         enemy->sleep_after_dash--;
-        if(check_if_hit_player(enemy->obj, win) && enemy->alive){
-            player->life_force -= enemy->damage;
-            enemy->alive = 0;
-            return 0;
-        }
         return 1;
     }
     if (enemy->sleep_after_dash ==0)dash_calculate(enemy,player);

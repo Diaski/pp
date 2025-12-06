@@ -25,17 +25,17 @@ void random_star_spawn(Win* win, LevelConfig_t* config, Star_t** stars, int* sta
     }
 
 }
-void move_star_list(Star_t** stars, int count, Win* win, Player_t* player){
+void move_star_list(Star_t** stars, int count, Win* win, Player_t* player,int only_draw){
     for (int i = 0; i < count; i++) {
         if(stars[i]->alive){
-            move_star(stars[i], win, player);
+            move_star(stars[i], win, player, only_draw);
         }
     }
 }
-void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player){
+void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player,int only_draw){
     for (int i = 0; i < count; i++) {
         if((*enemy)[i]->alive){
-            move_enemy((*enemy)[i], win, player);
+            move_enemy((*enemy)[i], win, player, only_draw);
         }
     }
 }
@@ -82,13 +82,13 @@ int game_loop(Win* main_win, Win* status_win, Player_t* p, int g_speed,LevelConf
             return PLAYER_DIED;
         }
 
-        handle_player_input(p, input,main_win,cfg, g_speed);
+        handle_player_input(p, input,main_win,cfg, g_speed,hunters,*hunters_count, stars,*stars_count);
 
         random_star_spawn(main_win, cfg, stars, stars_count);
-        move_star_list(stars, *stars_count, main_win, p);
+        move_star_list(stars, *stars_count, main_win, p, 0);
 
         random_enemy_spawn(main_win, cfg, hunters, hunters_count, time_left);
-        move_enemy_list(&hunters, *hunters_count, main_win, p);
+        move_enemy_list(&hunters, *hunters_count, main_win, p,0);
 
         update_status_display(status_win, p->name,level_num,time_left,p->stars,cfg->star_quota,p->life_force);
         wnoutrefresh(main_win->window);
@@ -128,17 +128,19 @@ int check_config(LevelConfig_t* config){
     return res;
 }
 
-void end_game(char* player_name, int level_num, int res){
+void end_game(char* player_name, int level_num, int res, int score){
     if(res == 0){
         congratulate_player_win(player_name, level_num);
     } else {
         printf("Level failed or exited.\n");
     }
+    save_to_leaderboard(player_name, score);
+    show_leaderboard();
 }
 Win* s_win_create(LevelConfig_t* cfg,int x,int y,int have_map){ 
     return create_window(cfg->map_rows,cfg->map_cols,x,y,have_map); //function to Make level selector cleaner for not writitng so many lines
 }
-int level_selector(char* player_name){
+int level_selector(char* p_name){
     const int level = display_level_selection_menu();
     if (level == -1){
         return EXIT_GAME;
@@ -154,11 +156,11 @@ int level_selector(char* player_name){
     Star_t** stars=(Star_t**)calloc((unsigned int)cfg->max_enemys_per_level,sizeof(Star_t*));
     Win* main_win=create_window(cfg->map_rows,cfg->map_cols,0,0,1);
     Win* status_win=create_window(cfg->status_rows,cfg->status_cols,0,cfg->map_rows,0);
-    Player_t* player=create_player(cfg);
+    Player_t* p=create_player(cfg);
     int stars_count=0;
     int hunters_count=0;
     const int game_speed = cfg->min_speed;
-    strncpy(player->name, player_name, PLAYER_NAME_MAX - 1);
+    strncpy(p->name, p_name, PLAYER_NAME_MAX - 1);
     
     refresh();
 
@@ -167,10 +169,9 @@ int level_selector(char* player_name){
     wnoutrefresh(main_win->window);
     doupdate();
 
-    if(res==0) res = game_loop(main_win,status_win,player, game_speed,cfg,hunters,&hunters_count, level, stars, &stars_count);
+    if(res==0) res = game_loop(main_win,status_win,p, game_speed,cfg,hunters,&hunters_count, level, stars, &stars_count);
     
-    end_game(player_name, level, res);
-    
-    free_all_from_level(cfg, hunters, hunters_count, stars, stars_count, main_win, status_win, player);
+    end_game(p_name, level, res, calculate_score(cfg, p, cfg->time_limit_ms, 0));
+    free_all_from_level(cfg, hunters, hunters_count, stars, stars_count, main_win, status_win, p);
     return res;
 }

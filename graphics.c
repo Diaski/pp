@@ -124,7 +124,7 @@ int display_level_selection_menu(void){
     mvwprintw(win->window,2,2,"Select Level:");
     for (int i=0;i<MAX_LEVELS+1;i++){
         if(i>=LEVEL_WIN_ROWS-4) break;
-        mvwprintw(win->window,4+i,4,"1. Level %c", '1'+i);
+        mvwprintw(win->window,4+i,4,"%c. Level %c",'1'+i, '1'+i);
         counter++;
     }
     mvwprintw(win->window,counter+1,2,"Enter number: ");
@@ -159,6 +159,53 @@ void change_sprite_base_on_direction(GameObject_t* obj){
     } else if(obj->dy < 0){
         obj->current_sprite = obj->sprites_list.up;
     }
+}
+int count_leaderboard_entries(void){
+    FILE* file = fopen("ranking.txt", "r");
+    if (file == NULL) {
+        return 0;
+    }
+    int count = 0;
+    char line[100];
+    while (fgets(line, sizeof(line), file)) {
+        count++;
+    }
+    fclose(file);
+    return count;
+}
+void show_leaderboard(){
+    clear();
+    refresh();
+    Win* win = create_window(LEADERBOARD_WIN_ROWS, LEADERBOARD_WIN_COLS, LEADERBOARD_WIN_X, LEADERBOARD_WIN_Y, 0);
+    draw_border(win);
+    mvwprintw(win->window, 1, 2, "Leaderboard:");
+    int entry_count = count_leaderboard_entries();
+    if (entry_count == 0) {
+        mvwprintw(win->window, 2, 2, "No leaderboard data available.");
+    }
+    else {
+        LeaderboardEntry_t* entries = load_leaderboard_entries(entry_count);
+        for (int i = 0; i < entry_count; i++) {
+            // 3 is the starting row and 2 is the starting column -2 from LEADERBOARD_WIN_ROWS for border
+            if (3+i >= LEADERBOARD_WIN_ROWS - 2) break;
+            mvwprintw(win->window, 3 + i, 2, "%d. %s - %d", i + 1, entries[i].name, entries[i].score);
+            
+            if (3 + i >= LEADERBOARD_WIN_ROWS - 2) {
+                mvwprintw(win->window, LEADERBOARD_WIN_ROWS - 2, 2, "...");
+                break;
+            }
+        }
+        for(int j=0;j<entry_count;j++){
+            free((void*)entries[j].name);
+        }
+        free((void*)entries);
+    }
+    wnoutrefresh(win->window);
+    doupdate();
+    usleep(LEADERBOARD_SLEEP_TIME_USC);
+    clear();
+    refresh();
+    del_window(win);
 }
 void draw_to_win_and_map(GameObject_t obj, Win* win, char map_char){
     draw_to_map_obj(obj, win, map_char);

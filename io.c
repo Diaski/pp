@@ -43,6 +43,7 @@ void base_asignements(LevelConfig_t* config, char* key,int value) {
     if (strcmp(key, "seed") == 0) config->seed = value;
     if (strcmp(key, "max_enemys_per_level") == 0) config->max_enemys_per_level = value;
     if (strcmp(key, "star_spawn_chance") == 0) config->star_spawn_chance = value;
+    if (strcmp(key, "base_score") == 0) config->base_score = value;
 }
 
 void assign_values(LevelConfig_t* config, char* key,char* line) {
@@ -83,6 +84,7 @@ void load_hunters(char* key, int value,char* string_val, LevelConfig_t* config, 
         else if (strcmp(attribute, "damage") == 0) config->hunters[i].damage = value;
         else if (strcmp(attribute, "color") == 0) config->hunters[i].obj.color = value;
         else if (strcmp(attribute, "dash_limit") == 0) config->hunters[i].dash_limit = value;
+        else if (strcmp(attribute, "base_dash_sleep_time") == 0) config->hunters[i].base_dash_sleep_time = value;
         else {
             load_sprites(attribute, string_val,&config->hunters[i].obj.sprites_list);
         }
@@ -141,6 +143,39 @@ void check_if_sprite_is_correct(GameObject_t* obj) {
         printf("Sprite size is incorect than width*height\n");
         exit(1);
     }
+}
+int compare_scores(const void* a, const void* b) {
+    LeaderboardEntry_t* entryA = (LeaderboardEntry_t*)a;
+    LeaderboardEntry_t* entryB = (LeaderboardEntry_t*)b;
+    return entryB->score - entryA->score;
+}
+LeaderboardEntry_t* load_leaderboard_entries(int entry_count) {
+        char temp_name[PLAYER_NAME_MAX+1];
+        FILE* file = fopen("ranking.txt", "r");
+        LeaderboardEntry_t* entries = (LeaderboardEntry_t*)calloc((unsigned int)entry_count, sizeof(LeaderboardEntry_t));
+        for(int i=0;i<entry_count;i++){
+            entries[i].name = (char*)calloc(PLAYER_NAME_MAX+1,sizeof(char));
+            if(entries[i].name == NULL){
+                exit(1);
+            }
+        }
+        int i = 0;
+        while (i < entry_count && fscanf(file, "%d %s", &entries[i].score, temp_name) == 2) {
+            strcpy(entries[i].name, temp_name); // Standard string copy
+            i++;
+        }
+        fclose(file);
+        qsort(entries, (size_t)entry_count, sizeof(entries[0]), compare_scores);
+        return entries;
+}
+int save_to_leaderboard(char* player_name, int score){
+    FILE* file = fopen("ranking.txt", "a");
+    if (file == NULL) {
+        return MALLOC_ERROR;
+    }
+    fprintf(file, "%d %s\n", score, player_name);
+    fclose(file);
+    return 0;
 }
 void free_level_config(LevelConfig_t* config) {
     if (config == NULL) return;
