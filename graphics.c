@@ -216,7 +216,7 @@ void remove_from_win_and_map(GameObject_t obj, Win* win){
 }
 
 //display leaderboard with entries and wait for some time
-void show_leaderboard(){
+void show_leaderboard(void){
     clear();
     refresh();
     Win* win = create_window(LEADERBOARD_WIN_ROWS, LEADERBOARD_WIN_COLS, LEADERBOARD_WIN_X, LEADERBOARD_WIN_Y, false);

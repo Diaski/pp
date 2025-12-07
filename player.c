@@ -37,6 +37,13 @@ Player_t* create_player(LevelConfig_t* config){
     return p;
 }
 
+int check_if_taxi_can_spawn(Win* win,Player_t* p){
+    if((p->obj.x + TAXI_WIDTH) < win->cols -1 && (p->obj.y + TAXI_HEIGHT) < win->rows -1 && (p->obj.x) > 0 && (p->obj.y) > 0){
+        return 1;
+    }
+    return 0;
+}
+
 void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count){
     remove_obj_from_window(p->obj, win);
     switch(input){
@@ -57,7 +64,7 @@ void handle_player_input(Player_t* p, char input, Win* win,LevelConfig_t* cfg,in
             p->obj.dy = 0;
             break;
         case K_TAXI:
-            if(p->taxi_cooldown <=0){
+            if(p->taxi_cooldown <=0 && check_if_taxi_can_spawn(win,p)){
                 taxi(p,win,game_speed,hunters,hunters_count,stars,stars_count);
                 p->taxi_cooldown = p->base_taxi_cooldown;
             }
