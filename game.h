@@ -122,6 +122,7 @@
 #define TAXI_BASE_SPEED 1000
 #define TAXI_SAFE_RANGE 1
 #define MAX_TAXI_SPAWN_ATTEMPTS 100
+#define TAXI_SAFE_MARGIN 2 // makesure taxi does not end too close hunter base of +value in all axis
 
 /* ==========================================
    ENTITY: STARS (COLLECTIBLES)
@@ -243,7 +244,7 @@ void create_map(Win* win);
 void remove_from_map_obj(GameObject_t obj, Win* win);
 void draw_to_map_obj(GameObject_t obj, Win* win,char symbol);
 void free_map(Map_t map, int size);
-int detect_if_spot_hunter(Win* win, int x, int y,Player_t* p);
+int find_safe_spot(Win* win, int x, int y, Player_t* p);
 
 //io.c
 LevelConfig_t* load_level_config(int level_num);

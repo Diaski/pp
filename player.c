@@ -137,24 +137,24 @@ void convert_player_to_taxi_sprite(Player_t* p, int x, int y){
 void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_count, Star_t** stars,int stars_count){
     int x=0,y=0;
     int count=0;
-    Sprite_t old_sprite= (Sprite_t)calloc((unsigned int)(strlen(p->obj.current_sprite)+1),sizeof(char));
+    char *old_sprite = (char*)calloc(strlen(p->obj.current_sprite) + 1,sizeof(char));
     strcpy(old_sprite, p->obj.current_sprite);
     const int old_width = p->obj.width;
     const int old_height = p->obj.height;
     const int prev_dy= p->obj.dy;
     const int prev_dx= p->obj.dx;
+    int mx = (p->obj.width > TAXI_WIDTH) ? p->obj.width : TAXI_WIDTH;
+    int my = (p->obj.height > TAXI_HEIGHT) ? p->obj.height : TAXI_HEIGHT;
+
     do{
-        x = rand() % (win->cols - p->obj.width -2) +p->obj.width+1;
-        y = rand() % (win->rows - p->obj.height -2) +p->obj.height+1;
-        count++;
-        if(count > MAX_TAXI_SPAWN_ATTEMPTS){
-            break;
-        }
-    }while(detect_if_spot_hunter(win, x, y, p));
+        x = rand() % (win->cols - mx - 2) + mx + 1;
+        y = rand() % (win->rows - my - 2) + my + 1;
+    }while(find_safe_spot(win, x, y, p) && ++count <= MAX_TAXI_SPAWN_ATTEMPTS);
+
     if(count <= MAX_TAXI_SPAWN_ATTEMPTS){
         remove_from_win_and_map(p->obj,win);
         convert_player_to_taxi_sprite(p, x, y);
-        while(p->obj.x != x && p->obj.y != y){
+        while((p->obj.x != x) || (p->obj.y != y)){
             while_in_dash_logic(p, win, game_speed, hunters, hunters_count, stars, stars_count, x, y);
         }
     }

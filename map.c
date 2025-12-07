@@ -53,20 +53,39 @@ void draw_to_map_obj(GameObject_t obj, Win* win,char symbol){
     }   
 }
 
-int detect_if_spot_hunter(Win* win, int x, int y,Player_t* p){
-    for(int row=0;row<p->obj.height+p->obj.dy;row++){
-        for(int col=0;col<p->obj.width+p->obj.dx;col++){
-            if(x+col<0 || y+row<0 || x+col>=win->cols - 1 || y+row>=win->rows - 1){
+int find_safe_spot(Win* win, int x, int y, Player_t* p) {
+
+    int row_start = y - TAXI_SAFE_MARGIN;
+    int row_end   = y + p->obj.height + TAXI_SAFE_MARGIN;
+    int col_start = x - TAXI_SAFE_MARGIN;
+    int col_end   = x + p->obj.width + TAXI_SAFE_MARGIN;
+
+    if (p->obj.dy > 0) {
+        row_end += p->obj.dy;
+    } else if (p->obj.dy < 0) {
+        row_start += p->obj.dy;
+    }
+
+    if (p->obj.dx > 0) {
+        col_end += p->obj.dx;
+    } else if (p->obj.dx < 0) {
+        col_start += p->obj.dx;
+    }
+
+    for (int row = row_start; row < row_end; row++) {
+        for (int col = col_start; col < col_end; col++) {
+
+            if (row < 0 || col < 0 || row >= win->rows -1 || col >= win->cols -1) {
                 return true;
             }
-            if(win->map[y+row][x+col]==ENEMY_SPRITE){
+
+            if (win->map[row][col] == ENEMY_SPRITE) {
                 return true;
             }
         }
     }
     return false;
 }
-
 void free_map(Map_t map, int size) {
     if (map == NULL) return;
 
