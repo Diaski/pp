@@ -243,7 +243,7 @@ void create_map(Win* win);
 void remove_from_map_obj(GameObject_t obj, Win* win);
 void draw_to_map_obj(GameObject_t obj, Win* win,char symbol);
 void free_map(Map_t map, int size);
-int detect_if_spot_hunter(Win* win, int x, int y,int width, int height);
+int detect_if_spot_hunter(Win* win, int x, int y,Player_t* p);
 
 //io.c
 LevelConfig_t* load_level_config(int level_num);

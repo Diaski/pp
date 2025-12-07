@@ -150,7 +150,7 @@ void taxi(Player_t* p, Win* win,int game_speed, Enemy_t** hunters,int hunters_co
         if(count > MAX_TAXI_SPAWN_ATTEMPTS){
             break;
         }
-    }while(detect_if_spot_hunter(win, x, y, p->obj.width, p->obj.height));
+    }while(detect_if_spot_hunter(win, x, y, p));
     if(count <= MAX_TAXI_SPAWN_ATTEMPTS){
         remove_from_win_and_map(p->obj,win);
         convert_player_to_taxi_sprite(p, x, y);

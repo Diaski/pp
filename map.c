@@ -53,10 +53,10 @@ void draw_to_map_obj(GameObject_t obj, Win* win,char symbol){
     }   
 }
 
-int detect_if_spot_hunter(Win* win, int x, int y,int width, int height){
-    for(int row=-height;row<height;row++){
-        for(int col=-width;col<width;col++){
-            if(x+col<0 || y+row<0 || x+col>=win->cols || y+row>=win->rows){
+int detect_if_spot_hunter(Win* win, int x, int y,Player_t* p){
+    for(int row=0;row<p->obj.height+p->obj.dy;row++){
+        for(int col=0;col<p->obj.width+p->obj.dx;col++){
+            if(x+col<0 || y+row<0 || x+col>=win->cols - 1 || y+row>=win->rows - 1){
                 return true;
             }
             if(win->map[y+row][x+col]==ENEMY_SPRITE){

@@ -1,28 +1,40 @@
+# Prefer clang
+CC = clang
+
+# Config
+# Modify your CFLAGS line to include -D_DEFAULT_SOURCE
+CFLAGS = -O0 -g -Wall -Werror -Wpedantic -Wshadow -std=c23 \
+         -D_XOPEN_SOURCE_EXTENDED -D_DEFAULT_SOURCE -Wextra \
+         -fno-omit-frame-pointer $(NCURSES_CFLAGS) \
+         -MMD -MP
+
+# Linker flags (Sanitizers must be linked here too!)
+LDFLAGS = -fsanitize=address -fsanitize=undefined
+
+LDLIBS = $(shell pkg-config --libs ncursesw 2>/dev/null || echo "-lncurses")
+
+# Define sources and object files
 SRC = main.c game.c player.c enemy.c star.c leaderboard.c io.c graphics.c map.c init.c physics.c
-# Prefer clang when present, otherwise fall back to system cc
-CC = $(shell command -v clang >/dev/null 2>&1 && echo clang || echo cc)
-
-# Prefer pkg-config for ncurses flags; fallback to common system paths
-NCURSES_CFLAGS := $(shell pkg-config --cflags ncursesw 2>/dev/null || pkg-config --cflags ncurses 2>/dev/null || echo "-I/usr/include")
-NCURSES_LIBS := $(shell pkg-config --libs ncursesw 2>/dev/null || pkg-config --libs ncurses 2>/dev/null || echo "-lncursesw")
-
-CFLAGS = -O3 -g -Wall -Werror -Wpedantic -Wshadow -std=c23 \
-         -D_XOPEN_SOURCE_EXTENDED -Wextra -fsanitize=undefined \
-         -fno-omit-frame-pointer $(NCURSES_CFLAGS) -fsanitize=address \
-         -MMD -MP 
-
-LDLIBS = $(NCURSES_LIBS)
+OBJ = $(SRC:.c=.o)
+DEP = $(OBJ:.o=.d)
 
 all: swallow
 
-swallow: $(SRC)
-	python3 count_chars.py  
-	$(CC) $(CFLAGS) $(LDFLAGS) $(SRC) -o swallow $(LDLIBS) 
+# Link step
+swallow: $(OBJ)
+	python3 count_chars.py
+	$(CC) $(LDFLAGS) $(OBJ) -o $@ $(LDLIBS)
+
+# Compile step (Implicit rule, but good to be explicit)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f swallow  
+	rm -f swallow $(OBJ) $(DEP)
 
 lint:
 	clang-tidy $(SRC) -- $(CFLAGS)
 
-.phony: lint
+-include $(DEP)
+
+.PHONY: all clean lint
