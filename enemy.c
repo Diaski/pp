@@ -23,9 +23,18 @@ void move_enemy_list(Enemy_t*** enemy, int count, Win* win, Player_t* player,int
         }
     }
 }
-//randomly spawn enemy based on config settings
+long long int calculate_enemy_chance_to_spawn(LevelConfig_t* config, int time_left){
+    const long long int time_elapsed = (long long int)config->time_limit_ms - time_left;
+    const long long int max_increase = (long long int)config->hunter_spawn_rate * ENEMY_COUNT_MULTIPLIER_OVER_TIME;
+    const long long int current_increase = (max_increase * time_elapsed) / config->time_limit_ms;
+    long long int chance = (long long int)config->hunter_spawn_rate - current_increase;
+    if (chance <= 0) chance = 1;
+    return chance;
+}
+
 void random_enemy_spawn(Win* win, LevelConfig_t* config, Enemy_t** hunters, int* hunters_c,int time_left){
-    if(rand()%config->hunter_spawn_rate==0 && *hunters_c < config->max_enemys){
+    long long int chance = calculate_enemy_chance_to_spawn(config, time_left);
+    if(rand()%chance==0 && *hunters_c < config->max_enemys){
         Enemy_t* new_enemy=spawn_enemy(win, config, rand()%(config->hunter_type_count), time_left);
         if(new_enemy != NULL){
             hunters[*hunters_c]=new_enemy;
@@ -116,12 +125,6 @@ void enemy_movement(Enemy_t* enemy,Player_t* player,Win* win){
 void move_enemy(Enemy_t* enemy, Win* win, Player_t* player,int only_draw){
     if(only_draw){
         draw_to_win_and_map(enemy->obj, win, ENEMY_SPRITE);
-        return;
-    }
-    if(check_if_hit_player(enemy->obj, win)&& enemy->alive ==ALIVE){
-        player->life_force -= enemy->damage;
-        enemy->alive = DEAD;
-        remove_from_win_and_map(enemy->obj, win);
         return;
     }
     remove_from_win_and_map(enemy->obj, win);

@@ -3,10 +3,7 @@ CC = clang
 
 # Config
 # Modify your CFLAGS line to include -D_DEFAULT_SOURCE
-CFLAGS = -O0 -g -Wall -Werror -Wpedantic -Wshadow -std=c23 \
-         -D_XOPEN_SOURCE_EXTENDED -D_DEFAULT_SOURCE -Wextra \
-         -fno-omit-frame-pointer $(NCURSES_CFLAGS) \
-         -MMD -MP
+CFLAGS = -O0 -g -Wall -Werror -Wpedantic -Wshadow
 
 # Linker flags (Sanitizers must be linked here too!)
 LDFLAGS = -fsanitize=address -fsanitize=undefined

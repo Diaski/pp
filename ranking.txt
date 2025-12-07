@@ -17,3 +17,5 @@
 12 Player1
 80 Player1
 192 Player1
+310 Player1
+512 Player1

@@ -141,6 +141,7 @@
 #define ENEMY_SPRITE 'E' 
 #define BOUNCES_MULT_OVER_TIME 5
 #define BOUNCES_CHANGE -1
+#define ENEMY_COUNT_MULTIPLIER_OVER_TIME 2
 
 typedef char** Map_t;
 
